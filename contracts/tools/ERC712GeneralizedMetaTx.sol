@@ -6,7 +6,7 @@ import './ERC712Base.sol';
 
 contract ERC712GeneralizedMetaTx is ERC712Base
 {
-	bytes32 public constant GENERALIZEDMETATX_TYPEHASH = keccak256(bytes("GeneralizedMetaTX(address sender,uint256 value,bytes4 selector,bytes extradata)"));
+	bytes32 public constant GENERALIZEDMETATX_TYPEHASH = keccak256(bytes("GeneralizedMetaTX(address sender,uint256 value,bytes4 selector,bytes extradata,bytes32 salt)"));
 	// bytes32 public constant GENERALIZEDMETATX_TYPEHASH = ;
 
 	struct GeneralizedMetaTX
@@ -15,6 +15,7 @@ contract ERC712GeneralizedMetaTx is ERC712Base
 		uint256 value;
 		bytes4  selector;
 		bytes   extradata;
+		bytes32 salt;
 	}
 
 	constructor()
@@ -30,6 +31,7 @@ contract ERC712GeneralizedMetaTx is ERC712Base
 		, _metatx.value
 		, _metatx.selector
 		, _metatx.extradata
+		, _metatx.salt
 		));
 	}
 }
