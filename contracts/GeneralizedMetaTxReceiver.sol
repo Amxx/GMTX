@@ -18,8 +18,8 @@ contract GeneralizedMetaTxReceiver is SignatureVerifier, ERC712GeneralizedMetaTx
 	{
 		// check value
 		require(_metatx.value == msg.value, 'invalid-value');
-		// check signature
 
+		// check signature
 		require(_checkSignature(
 			_metatx.sender,
 			_toEthTypedStructHash(_hash(_metatx), _hash(domain())),
