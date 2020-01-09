@@ -32,6 +32,8 @@ contract GeneralizedMetaTxReceiver is SignatureVerifier, ERC712GeneralizedMetaTx
 			abi.encode(_metatx.sender),
 			_metatx.extradata
 		));
+
+		// revert on failure
 		if (!success)
 		{
 			revert(string(returndata));
