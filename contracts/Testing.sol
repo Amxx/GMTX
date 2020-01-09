@@ -1,10 +1,10 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
-import './GeneralizedMetaTxReceiver.sol';
+import './GMTXReceiver.sol';
 
 
-contract Testing is GeneralizedMetaTxReceiver
+contract Testing is GMTXReceiver
 {
 	address public lastSender;
 	address public lastAccount;

@@ -2,10 +2,10 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import './tools/SignatureVerifier.sol';
-import './tools/ERC712GeneralizedMetaTx.sol';
+import './tools/ERC712GMTX.sol';
 
 
-contract GeneralizedMetaTxReceiver is SignatureVerifier, ERC712GeneralizedMetaTx
+contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 {
 	mapping(bytes32 => bool   ) internal m_replay;
 	mapping(address => uint256) internal m_nonce;
@@ -16,7 +16,7 @@ contract GeneralizedMetaTxReceiver is SignatureVerifier, ERC712GeneralizedMetaTx
 		_;
 	}
 
-	function receiveMetaTx(GeneralizedMetaTX memory _metatx, bytes memory _signature) public payable
+	function receiveMetaTx(GMTX memory _metatx, bytes memory _signature) public payable
 	{
 		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(domain()));
 		address sender = _extract(_metatx.data);
