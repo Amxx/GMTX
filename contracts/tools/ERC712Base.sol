@@ -16,7 +16,7 @@ contract ERC712Base
 		address verifyingContract;
 	}
 
-	constructor(string _name, string _version)
+	constructor(string memory _name, string memory _version)
 	public
 	{
 		name    = _name;

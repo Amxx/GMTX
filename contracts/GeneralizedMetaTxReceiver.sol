@@ -19,32 +19,37 @@ contract GeneralizedMetaTxReceiver is SignatureVerifier, ERC712GeneralizedMetaTx
 	function receiveMetaTx(GeneralizedMetaTX memory _metatx, bytes memory _signature) public payable
 	{
 		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(domain()));
-
-		// check ordering
-		m_nonce[_metatx.sender]++;
-		require(_metatx.nonce == 0 || _metatx.nonce == m_nonce[_metatx.sender], "invalid-nonce");
-
-		// check replay
-		require(!m_replay[digest], 'replay-prevention');
-		m_replay[digest] = true;
-
-		// check value
-		require(_metatx.value == msg.value, 'invalid-value');
+		address sender = _extract(_metatx.data);
 
 		// check signature
-		require(_checkSignature(_metatx.sender, digest, _signature), 'invalid-signature');
+		require(_checkSignature(sender, digest, _signature), 'GMTX/invalid-signature');
+
+		// check ordering
+		m_nonce[sender]++;
+		require(_metatx.nonce == 0 || _metatx.nonce == m_nonce[sender], 'GMTX/invalid-nonce');
+
+		// check replay protection
+		require(!m_replay[digest], 'GMTX/replay-prevention');
+		m_replay[digest] = true;
+
+		// check expiry
+		require(_metatx.expiry == 0 || _metatx.expiry > now, 'GMTX/expired');
+
+		// check value
+		require(_metatx.value == msg.value, 'GMTX/invalid-value');
 
 		// forward call
-		(bool success, bytes memory returndata) = address(this).call.value(msg.value)(abi.encodePacked(
-			_metatx.selector,
-			abi.encode(_metatx.sender),
-			_metatx.extradata
-		));
+		(bool success, bytes memory returndata) = address(this).call.value(msg.value)(abi.encodePacked(_metatx.data));
 
 		// revert on failure
 		if (!success)
 		{
 			revert(string(returndata));
 		}
+	}
+
+	function _extract(bytes memory _data) internal pure returns (address sender)
+	{
+		assembly { sender := mload(add(_data, 0x24)) }
 	}
 }
