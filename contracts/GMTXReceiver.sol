@@ -42,23 +42,16 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 	}
 
 	function _msgSender()
-	internal view returns (address payable)
+	internal view returns (address payable sender)
 	{
-		if (msg.sender == address(this))
-		{
-			_extractTail(msg.data);
-		}
-		else
-		{
-			return msg.sender;
-		}
+		return (msg.sender == address(this)) ? _getMsgSender() : msg.sender;
 	}
 
-	/* returns the last 20 bytes at the end of _data */
-	function _extractTail(bytes memory _data)
-	internal pure returns (address addr)
+	function _getMsgSender()
+	internal pure returns (address payable sender)
 	{
-		uint256 size = _data.length;
-		assembly { addr := mload(add(_data, size)) } // stangelly enough, this works without additional offset
+		bytes memory data   = msg.data;
+		uint256      length = msg.data.length;
+		assembly { sender := and(mload(add(data, length)), 0xffffffffffffffffffffffffffffffffffffffff) }
 	}
 }
