@@ -46,14 +46,13 @@ contract('Main', async (accounts) => {
 	describe('testing', async () => {
 		it('direct call', async () => {
 			const txMined = await TestingInstance.test('direct-call-test', { from: accounts[0] });
-			const events = extractEvents(txMined, TestingInstance.address, 'Test');
-			assert.equal(events.length,            1);
-			assert.equal(events[0].args.msgsender, accounts[0]);
-			assert.equal(events[0].args.sender,    accounts[0]);
-			assert.equal(events[0].args.details,   'direct-call-test');
+			const events = extractEvents(txMined, TestingInstance.address, 'NewMessage');
+			assert.equal(events.length,          1);
+			assert.equal(events[0].args.sender,  accounts[0]);
+			assert.equal(events[0].args.message, 'direct-call-test');
 		});
 
-		it('sign gmtx', async () => {
+		it('relayed call', async () => {
 			const gmtx = {
 				sender: accounts[1],
 				data:   TestingInstance.contract.methods.test('relayed-call-test').encodeABI(),
@@ -65,11 +64,10 @@ contract('Main', async (accounts) => {
 			const sign = await tools.sign(gmtx, TestingInstance, wallets.privateKeys[accounts[1].toLowerCase()]);
 
 			const txMined = await TestingInstance.receiveMetaTx(gmtx, sign, { from: accounts[0] });
-			const events = extractEvents(txMined, TestingInstance.address, 'Test');
-			assert.equal(events.length,            1);
-			assert.equal(events[0].args.msgsender, TestingInstance.address); // mirror
-			assert.equal(events[0].args.sender,    accounts[1]);
-			assert.equal(events[0].args.details,   'relayed-call-test');
+			const events = extractEvents(txMined, TestingInstance.address, 'NewMessage');
+			assert.equal(events.length,          1);
+			assert.equal(events[0].args.sender,  accounts[1]);
+			assert.equal(events[0].args.message, 'relayed-call-test');
 		});
 	});
 

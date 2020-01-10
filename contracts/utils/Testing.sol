@@ -6,12 +6,12 @@ import '../GMTXReceiver.sol';
 
 contract Testing is GMTXReceiver
 {
-	event Test(address msgsender, address sender, string details);
+	event NewMessage(address sender, string message);
 
 	constructor() public GMTXReceiver(false) {}
 
-	function test(string calldata details) external
+	function test(string calldata message) external
 	{
-		emit Test(msg.sender, _msgSender(), details);
+		emit NewMessage(_msgSender(), message);
 	}
 }
