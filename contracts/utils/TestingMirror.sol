@@ -11,7 +11,7 @@ contract Testing is GMTXReceiver
 
 	event Test(address msgsender, address sender);
 
-	constructor() public GMTXReceiver(false) {}
+	constructor() public GMTXReceiver(true) {}
 
 	function test() external
 	{

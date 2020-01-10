@@ -14,14 +14,21 @@ contract GMTXMirror
 
 contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 {
-	GMTXMirror                  internal m_mirror;
-	mapping(bytes32 => bool   ) internal m_replay;
-	mapping(address => uint256) internal m_nonce;
+	address                     m_mirror;
+	mapping(bytes32 => bool   ) m_replay;
+	mapping(address => uint256) m_nonce;
 
-	constructor()
+	constructor(bool useMirror)
 	public
 	{
-		m_mirror = new GMTXMirror();
+		if (useMirror)
+		{
+			m_mirror = address(new GMTXMirror());
+		}
+		else
+		{
+			m_mirror = address(this);
+		}
 	}
 
 	function receiveMetaTx(GMTX memory _metatx, bytes memory _signature) public payable
@@ -46,7 +53,7 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		require(_metatx.value == msg.value, 'GMTX/invalid-value');
 
 		// forward call: msg.sender = address(this), real sender, is appended at the end of calldata
-		(bool success, bytes memory returndata) = address(m_mirror).call.value(msg.value)(abi.encodePacked(_metatx.data, _metatx.sender));
+		(bool success, bytes memory returndata) = m_mirror.call.value(msg.value)(abi.encodePacked(_metatx.data, _metatx.sender));
 
 		// revert on failure
 		if (!success)
@@ -58,7 +65,7 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 	function _msgSender()
 	internal view returns (address payable sender)
 	{
-		return (msg.sender == address(m_mirror)) ? _getRelayedSender() : msg.sender;
+		return (msg.sender == m_mirror) ? _getRelayedSender() : msg.sender;
 	}
 
 	function _getRelayedSender()
