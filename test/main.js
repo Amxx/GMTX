@@ -46,7 +46,7 @@ contract('Main', async (accounts) => {
 	describe('testing', async () => {
 		describe('direct call', async () => {
 			it('tx', async () => {
-				txMined = await TestingInstance.test('direct-call-test', { from: accounts[0] });
+				txMined = await TestingInstance.publish('direct-call-test', { from: accounts[0] });
 
 				events = extractEvents(txMined, TestingInstance.address, 'NewMessage');
 				assert.equal(events.length,          1);
@@ -59,7 +59,7 @@ contract('Main', async (accounts) => {
 			it('prepare gmtx', async () => {
 				gmtx = {
 					sender: accounts[1],
-					data:   TestingInstance.contract.methods.test('relayed-call-test').encodeABI(),
+					data:   TestingInstance.contract.methods.publish('relayed-call-test').encodeABI(),
 					value:  0,
 					nonce:  0,
 					expiry: 0,

@@ -10,7 +10,7 @@ contract Testing is GMTXReceiver
 
 	constructor() public GMTXReceiver(false) {}
 
-	function test(string calldata message) external
+	function publish(string calldata message) external
 	{
 		emit NewMessage(_msgSender(), message);
 	}

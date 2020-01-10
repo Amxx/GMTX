@@ -10,7 +10,7 @@ contract TestingMirror is GMTXReceiver
 
 	constructor() public GMTXReceiver(true) {}
 
-	function test(string calldata message) external
+	function publish(string calldata message) external
 	{
 		emit NewMessage(_msgSender(), message);
 	}
