@@ -4,11 +4,11 @@ pragma experimental ABIEncoderV2;
 import '../GMTXReceiver.sol';
 
 
-contract TestingMirror is GMTXReceiver
+contract MessageHub is GMTXReceiver
 {
 	event NewMessage(address sender, string message);
 
-	constructor() public GMTXReceiver(true) {}
+	constructor() public GMTXReceiver(false) {}
 
 	function publish(string calldata message) external
 	{

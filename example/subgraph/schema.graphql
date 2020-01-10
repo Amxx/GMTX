@@ -1,0 +1,13 @@
+type Message @entity
+{
+	id:                           ID!
+	sender:                       Account!
+	content:                      String!
+	timestamp:                    BigInt!
+}
+
+type Account @entity
+{
+	id:                           ID!
+	messages:                     [Message!]! @derivedFrom(field: "sender")
+}
