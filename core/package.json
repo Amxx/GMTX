@@ -22,11 +22,9 @@
   "author": "Hadrien Croubois",
   "license": "MIT",
   "homepage": "https://github.com/amxx/GMTX.git#readme",
-  "dependencies": {
-    "zos-lib": "^2.4.2"
-  },
   "devDependencies": {
     "@openzeppelin/test-helpers": "0.5.4",
+    "@truffle/hdwallet-provider": "1.0.28",
     "chai": "4.2.0",
     "eth-sig-util": "2.5.2",
     "ganache-cli": "6.8.1",

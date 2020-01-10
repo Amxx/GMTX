@@ -1,3 +1,5 @@
+var HDWalletProvider = require("@truffle/hdwallet-provider");
+
 module.exports =
 {
 	plugins: [ "truffle-security" ],
@@ -17,6 +19,12 @@ module.exports =
 			network_id: "*",
 			gas:        0xFFFFFFFFFFF, // <-- Use this high gas value
 			gasPrice:   0x01           // <-- Use this low gas price
+		},
+		goerli:
+		{
+			provider: () => new HDWalletProvider(process.env.MNEMONIC, process.env.GOERLI_NODE),
+			network_id: '5',
+			gasPrice:   22000000000, //22Gwei
 		}
 	},
 	compilers: {
