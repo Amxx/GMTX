@@ -44,10 +44,10 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 	function _msgSender()
 	internal view returns (address payable sender)
 	{
-		return (msg.sender == address(this)) ? _getMsgSender() : msg.sender;
+		return (msg.sender == address(this)) ? _getRelayedSender() : msg.sender;
 	}
 
-	function _getMsgSender()
+	function _getRelayedSender()
 	internal pure returns (address payable sender)
 	{
 		bytes memory data   = msg.data;
