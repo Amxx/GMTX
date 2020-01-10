@@ -1,0 +1,36 @@
+.app
+{
+	min-height:       100vh;
+	display:          flex;
+	flex-direction:   column;
+	align-items:      center;
+	justify-content: 	center;
+}
+
+.app h1
+{
+	text-align:    center;
+	margin-bottom: 2rem;
+}
+
+.app.app-dark
+{
+	background-color: #282c34;
+}
+
+.app.app-dark h1
+{
+	color: #f8f9fa;
+}
+
+.app .card .card-header h3
+{
+	display:     inline-block;
+	font-size:   1.25rem;
+	font-weight: bold;
+	margin:      0;
+}
+.app .card .card-header .badge
+{
+	margin: 0.25em 0;
+}
