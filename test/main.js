@@ -28,7 +28,7 @@ contract('Main', async (accounts) => {
 
 	describe('pre flight check', async () => {
 		it('domain', async () => {
-			const domain = await TestingInstance.domain();
+			domain = await TestingInstance.domain();
 			assert.equal(domain.name,              'GeneralizedMetaTX'    );
 			assert.equal(domain.version,           '0.0.1-beta.1'         );
 			assert.equal(domain.chainId,           '1'                    ); // TODO: wait for ganache fix
@@ -44,30 +44,59 @@ contract('Main', async (accounts) => {
 	});
 
 	describe('testing', async () => {
-		it('direct call', async () => {
-			const txMined = await TestingInstance.test('direct-call-test', { from: accounts[0] });
-			const events = extractEvents(txMined, TestingInstance.address, 'NewMessage');
-			assert.equal(events.length,          1);
-			assert.equal(events[0].args.sender,  accounts[0]);
-			assert.equal(events[0].args.message, 'direct-call-test');
+		describe('direct call', async () => {
+			it('tx', async () => {
+				txMined = await TestingInstance.test('direct-call-test', { from: accounts[0] });
+
+				events = extractEvents(txMined, TestingInstance.address, 'NewMessage');
+				assert.equal(events.length,          1);
+				assert.equal(events[0].args.sender,  accounts[0]);
+				assert.equal(events[0].args.message, 'direct-call-test');
+			});
 		});
 
-		it('relayed call', async () => {
-			const gmtx = {
-				sender: accounts[1],
-				data:   TestingInstance.contract.methods.test('relayed-call-test').encodeABI(),
-				value:  0,
-				nonce:  0,
-				expiry: 0,
-				salt:   web3.utils.randomHex(32),
-			};
-			const sign = await tools.sign(gmtx, TestingInstance, wallets.privateKeys[accounts[1].toLowerCase()]);
+		describe('relayed call', async () => {
+			it('prepare gmtx', async () => {
+				gmtx = {
+					sender: accounts[1],
+					data:   TestingInstance.contract.methods.test('relayed-call-test').encodeABI(),
+					value:  0,
+					nonce:  0,
+					expiry: 0,
+					salt:   web3.utils.randomHex(32),
+				};
+				sign = await tools.sign(gmtx, TestingInstance, wallets.privateKeys[accounts[1].toLowerCase()]);
 
-			const txMined = await TestingInstance.receiveMetaTx(gmtx, sign, { from: accounts[0] });
-			const events = extractEvents(txMined, TestingInstance.address, 'NewMessage');
-			assert.equal(events.length,          1);
-			assert.equal(events[0].args.sender,  accounts[1]);
-			assert.equal(events[0].args.message, 'relayed-call-test');
+				// Only for testing purposes
+				_digest = '0x'+TypedDataUtils.sign({
+					domain:      domain,
+					types:       tools.TYPES,
+					primaryType: 'GMTX',
+					message:     gmtx,
+				}).toString('hex');
+			});
+
+			it('before', async () => {
+				assert.equal(await TestingInstance.gmtx_nonce(accounts[1]), 0);
+				assert.equal(await TestingInstance.gmtx_replay(_digest), false);
+			});
+
+			it('tx', async () => {
+				txMined = await TestingInstance.receiveMetaTx(gmtx, sign, { from: accounts[0] });
+
+				events = extractEvents(txMined, TestingInstance.address, 'NewMessage');
+				assert.equal(events.length,          1);
+				assert.equal(events[0].args.sender,  accounts[1]);
+				assert.equal(events[0].args.message, 'relayed-call-test');
+
+				events = extractEvents(txMined, TestingInstance.address, 'GMTXReceived');
+				assert.equal(events[0].args.hash, _digest);
+			});
+
+			it('after', async () => {
+				assert.equal(await TestingInstance.gmtx_nonce(accounts[1]), 1);
+				assert.equal(await TestingInstance.gmtx_replay(_digest), true);
+			});
 		});
 	});
 

@@ -14,20 +14,22 @@ contract GMTXMirror
 
 contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 {
-	address                     m_mirror;
-	mapping(bytes32 => bool   ) m_replay;
-	mapping(address => uint256) m_nonce;
+	address                     public gmtx_mirror;
+	mapping(bytes32 => bool   ) public gmtx_replay;
+	mapping(address => uint256) public gmtx_nonce;
+
+	event GMTXReceived(bytes32 hash);
 
 	constructor(bool useMirror)
 	public
 	{
 		if (useMirror)
 		{
-			m_mirror = address(new GMTXMirror());
+			gmtx_mirror = address(new GMTXMirror());
 		}
 		else
 		{
-			m_mirror = address(this);
+			gmtx_mirror = address(this);
 		}
 	}
 
@@ -39,12 +41,12 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		require(_checkSignature(_metatx.sender, digest, _signature), 'GMTX/invalid-signature');
 
 		// check ordering
-		m_nonce[_metatx.sender]++;
-		require(_metatx.nonce == 0 || _metatx.nonce == m_nonce[_metatx.sender], 'GMTX/invalid-nonce');
+		gmtx_nonce[_metatx.sender]++;
+		require(_metatx.nonce == 0 || _metatx.nonce == gmtx_nonce[_metatx.sender], 'GMTX/invalid-nonce');
 
 		// check replay protection
-		require(!m_replay[digest], 'GMTX/replay-prevention');
-		m_replay[digest] = true;
+		require(!gmtx_replay[digest], 'GMTX/replay-prevention');
+		gmtx_replay[digest] = true;
 
 		// check expiry
 		require(_metatx.expiry == 0 || _metatx.expiry > now, 'GMTX/expired');
@@ -53,10 +55,13 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		require(_metatx.value == msg.value, 'GMTX/invalid-value');
 
 		// forward call: msg.sender = address(this), real sender, is appended at the end of calldata
-		(bool success, bytes memory returndata) = m_mirror.call.value(msg.value)(abi.encodePacked(_metatx.data, _metatx.sender));
+		(bool success, bytes memory returndata) = gmtx_mirror.call.value(msg.value)(abi.encodePacked(_metatx.data, _metatx.sender));
 
-		// revert on failure
-		if (!success)
+		if (success)
+		{
+			emit GMTXReceived(digest);
+		}
+		else
 		{
 			revert(string(returndata));
 		}
@@ -65,7 +70,7 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 	function _msgSender()
 	internal view returns (address payable sender)
 	{
-		return (msg.sender == m_mirror) ? _getRelayedSender() : msg.sender;
+		return (msg.sender == gmtx_mirror) ? _getRelayedSender() : msg.sender;
 	}
 
 	function _getRelayedSender()
