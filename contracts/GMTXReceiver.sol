@@ -1,8 +1,8 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
-import './tools/SignatureVerifier.sol';
-import './tools/ERC712GMTX.sol';
+import './modules/SignatureVerifier.sol';
+import './modules/ERC712GMTX.sol';
 
 
 contract GMTXReceiver is SignatureVerifier, ERC712GMTX
@@ -10,23 +10,16 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 	mapping(bytes32 => bool   ) internal m_replay;
 	mapping(address => uint256) internal m_nonce;
 
-	modifier withMetaTx(address sender)
-	{
-		require(sender == msg.sender || address(this) == msg.sender);
-		_;
-	}
-
 	function receiveMetaTx(GMTX memory _metatx, bytes memory _signature) public payable
 	{
 		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(domain()));
-		address sender = _extract(_metatx.data);
 
 		// check signature
-		require(_checkSignature(sender, digest, _signature), 'GMTX/invalid-signature');
+		require(_checkSignature(_metatx.sender, digest, _signature), 'GMTX/invalid-signature');
 
 		// check ordering
-		m_nonce[sender]++;
-		require(_metatx.nonce == 0 || _metatx.nonce == m_nonce[sender], 'GMTX/invalid-nonce');
+		m_nonce[_metatx.sender]++;
+		require(_metatx.nonce == 0 || _metatx.nonce == m_nonce[_metatx.sender], 'GMTX/invalid-nonce');
 
 		// check replay protection
 		require(!m_replay[digest], 'GMTX/replay-prevention');
@@ -38,8 +31,8 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		// check value
 		require(_metatx.value == msg.value, 'GMTX/invalid-value');
 
-		// forward call
-		(bool success, bytes memory returndata) = address(this).call.value(msg.value)(abi.encodePacked(_metatx.data));
+		// forward call: msg.sender = address(this), real sender, is appended at the end of calldata
+		(bool success, bytes memory returndata) = address(this).call.value(msg.value)(abi.encodePacked(_metatx.data, _metatx.sender));
 
 		// revert on failure
 		if (!success)
@@ -48,8 +41,24 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		}
 	}
 
-	function _extract(bytes memory _data) internal pure returns (address sender)
+	function _msgSender()
+	internal view returns (address payable)
 	{
-		assembly { sender := mload(add(_data, 0x24)) }
+		if (msg.sender == address(this))
+		{
+			_extractTail(msg.data);
+		}
+		else
+		{
+			return msg.sender;
+		}
+	}
+
+	/* returns the last 20 bytes at the end of _data */
+	function _extractTail(bytes memory _data)
+	internal pure returns (address addr)
+	{
+		uint256 size = _data.length;
+		assembly { addr := mload(add(_data, size)) } // stangelly enough, this works without additional offset
 	}
 }

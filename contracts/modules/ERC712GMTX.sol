@@ -6,11 +6,12 @@ import './ERC712Base.sol';
 
 contract ERC712GMTX is ERC712Base
 {
-	bytes32 public constant GMTX_TYPEHASH = keccak256(bytes("GMTX(bytes data,uint256 value,uint256 nonce,bytes32 salt)"));
+	bytes32 public constant GMTX_TYPEHASH = keccak256(bytes("GMTX(address sender,bytes data,uint256 value,uint256 nonce,uint256 expiry,bytes32 salt)"));
 	// bytes32 public constant GMTX_TYPEHASH = ;
 
 	struct GMTX
 	{
+		address sender;
 		bytes   data;
 		uint256 value;
 		uint256 nonce;
@@ -27,6 +28,7 @@ contract ERC712GMTX is ERC712Base
 	{
 		return keccak256(abi.encode(
 			GMTX_TYPEHASH
+		, _metatx.sender
 		, keccak256(_metatx.data)
 		, _metatx.value
 		, _metatx.nonce
