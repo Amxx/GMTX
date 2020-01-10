@@ -1,0 +1,12 @@
+{
+	"networks":
+	{
+		"5":
+		{
+			"name":     "goerli",
+			"thegraph": "https://api.thegraph.com/subgraphs/name/amxx/gmtx-message-hub-showcase",
+			"address":  "0x41f4F18E65D1a924A8e5100d9f4ae787fC51bC2d",
+			"relayer":  "0x3141592653589793238462643383279502884197169399375105820974944592"
+		}
+	}
+}

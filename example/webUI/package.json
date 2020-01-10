@@ -10,12 +10,17 @@
     "apollo-client": "^2.6.4",
     "apollo-link-http": "^1.5.16",
     "bootstrap": "^4.4.1",
+    "ethereum-react-components": "^1.14.0",
+    "ethers": "^4.0.42",
+    "fbemitter": "^2.1.1",
     "graphql": "^14.5.8",
     "graphql-tag": "^2.10.1",
     "react": "^16.9.0",
     "react-bootstrap": "^1.0.0-beta.16",
     "react-dom": "^16.9.0",
-    "react-scripts": "3.1.1"
+    "react-notifications": "^1.4.3",
+    "react-scripts": "3.1.1",
+    "react-scroll": "^1.7.15"
   },
   "scripts": {
     "start": "react-scripts start",

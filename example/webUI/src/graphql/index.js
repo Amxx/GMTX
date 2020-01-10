@@ -1,5 +1,5 @@
-import { default as subgraph } from './subgraph';
+import { default as messages } from './messages';
 
 export default {
-	subgraph,
+	messages,
 };
