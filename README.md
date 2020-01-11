@@ -45,12 +45,14 @@ GMTX has been designed with security in mind. Still, this is early work and we d
 - Your smart contracts allows user to perform arbitrary calls to any address (`address(...).call(...)`):
 	- **DO NOT USE GMTX !** (users can impersonate someone else)
 - Your smart contracts performs calls to itself (`this.functionName(...)`):
-	- **DO NOT USE GMTX !** (`_msgSender` is not reliable unless you append the right value at the end of calldata)
+	- **ENABLE THE MIRROR MODE** (`_msgSender` would not be reliable unless you enable the mirror mode: pass `true` to the GMTXReceiver's constructor)
 
 
 ## How does it work?
 
 ### GMTXReceiver smart contract
+
+#### Direct vs Mirror Mode
 
 ### Writting and signing a gmtx meta-transaction
 
