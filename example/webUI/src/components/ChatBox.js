@@ -22,13 +22,11 @@ class ChatBox extends React.Component
 	{
 		event.preventDefault();
 
-		const gmtx = this.props.context.GMTX.sanitize({
+		this.props.context.GMTX.sign({
 			sender: this.props.context.getWallet(),
 			data:   this.props.context.contract.interface.functions.publish.encode([event.target[0].value])
-		});
-
-		this.props.context.GMTX.sign(gmtx)
-		.then(signature => {
+		})
+		.then(({gmtx, signature}) => {
 			this.props.context.emitter.emit("Notify", "info", "Sending meta transaction to relayer...","Meta transaction succesfully signed");
 			this.props.context.GMTX.relay(gmtx, signature)
 			.then(() => {
@@ -59,7 +57,7 @@ class ChatBox extends React.Component
 					<Messages/>
 					<div className="message-box">
 						<form onSubmit={this.handleSubmit.bind(this)}>
-							<textarea type="text" className="message-input" placeholder="Type message..."></textarea>
+							<input type="text" className="message-input" placeholder="Type message..."></input>
 							<button type="submit" className="message-submit">Send</button>
 						</form>
 					</div>

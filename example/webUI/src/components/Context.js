@@ -44,7 +44,6 @@ class ContextProvider extends React.Component
 			getNetwork: this.getNetwork,
 			getWallet:  this.getWallet,
 			GMTX: {
-				sanitize: this.gmtx_sanitize,
 				sign:     this.gmtx_sign,
 				relay:    this.gmtx_relay,
 			}
@@ -126,21 +125,21 @@ class ContextProvider extends React.Component
 		return ethers.utils.getAddress(window.ethereum.selectedAddress);
 	}
 
-	gmtx_sanitize = (gmtx) => {
-		return {
+	gmtx_sign = (gmtx) => {
+		// sanitize
+		const sgmtx = {
 			value:  0,
 			nonce:  0,
 			expiry: 0,
 			salt:   ethers.utils.hexlify(ethers.utils.randomBytes(32)),
 			...gmtx,
-		}
-	}
-
-	gmtx_sign = (gmtx) => {
+		};
+		// produce signature
 		return new Promise((resolve, reject) => {
+			// retreive domain
 			this.state.contract.domain()
 			.then(domain => {
-				const from = this.state.signer.provider.selectedAddress
+				// build data
 				const data = JSON.stringify({
 					types:       TYPES,
 					primaryType: "GMTX",
@@ -153,20 +152,20 @@ class ContextProvider extends React.Component
 					},
 					message:
 					{
-						sender: gmtx.sender.toString(),
-						data:   gmtx.data,
-						value:  gmtx.value.toString(),
-						nonce:  gmtx.nonce.toString(),
-						expiry: gmtx.expiry.toString(),
-						salt:   gmtx.salt.toString(),
+						sender: sgmtx.sender.toString(),
+						data:   sgmtx.data,
+						value:  sgmtx.value.toString(),
+						nonce:  sgmtx.nonce.toString(),
+						expiry: sgmtx.expiry.toString(),
+						salt:   sgmtx.salt.toString(),
 					}
 				});
+				// call eth_signTypedData_v3
 				this.state.signer.provider.sendAsync({
-					method: "eth_signTypedData_v4",
-					params: [from, data ],
-					from: from
+					method: "eth_signTypedData_v3",
+					params: [sgmtx.sender, data],
 				}, (error, result) => {
-					error ? reject(error) : resolve(result.result)
+					error ? reject(error) : resolve({ gmtx: sgmtx, signature: result.result })
 				})
 			})
 			.catch(reject);
@@ -174,7 +173,7 @@ class ContextProvider extends React.Component
 	}
 
 	gmtx_relay = (gmtx, signature) => {
-		return this.state.contract.receiveMetaTx(gmtx, signature)
+		return this.state.contract.receiveMetaTx(gmtx, signature);
 	}
 
 	render() {
