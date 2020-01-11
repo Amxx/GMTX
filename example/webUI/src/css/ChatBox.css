@@ -75,6 +75,9 @@ Chat Title
 	font-size: .7em;
 	letter-spacing: 1px;
 }
+.chat-title svg {
+	fill: rgba(255, 255, 255, 0.7);
+}
 
 /*--------------------
 Messages
@@ -420,3 +423,6 @@ Bounce
 		transform: translateY(-10px);
 	}
 }
+
+.float-left  { float: left;  }
+.float-right { float: right; }
