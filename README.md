@@ -52,8 +52,15 @@ GMTX has been designed with security in mind. Still, this is early work and we d
 
 ### GMTXReceiver smart contract
 
-#### Direct vs Mirror Mode
+### Direct vs Mirror Mode
 
 ### Writting and signing a gmtx meta-transaction
 
 ### Relaying a gmtx meta-transaction
+
+## Authors & Contributors
+
+- Hadrien Croubois <hadrien.croubois@gmail.com>
+  - Protocole design
+  - Solidity toolkit
+  - Demo app
