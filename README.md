@@ -9,11 +9,11 @@ From Metamask's [post](https://medium.com/metamask/announcing-a-generalized-meta
 >
 > There are two major ways that MetaTransactions can become available to users, and we are working towards both, but this bounty will focus on the latter.
 >
-> The Contract Account Approach
+> **The Contract Account Approach**
 >
 > We look forward to allowing every user to have a contract-based account, and these accounts could support MetaTransactions natively. We are currently facilitating this goal with our [Snaps plugin system](https://medium.com/metamask/introducing-the-next-evolution-of-the-web3-wallet-4abdf801a4ee), which will eventually support any number of different account types, such as the Gnosis Safe wallet, which already supports this type of MetaTransaction today.
 >
-> The Contract Based Approach
+> **The Contract Based Approach**
 >
 > The second major approach to allowing MetaTransactions is for contracts to expose a MetaTransaction processing method on themselves. We have seen some projects recently begin driving this forward, with [Bounties Network](https://medium.com/bounties-network/going-live-with-meta-transactions-a425ab6b6994) ([code](https://github.com/Bounties-Network/StandardBounties/blob/master/contracts/StandardBounties.sol)) and Dai Stablecoin‘s [permit method](https://medium.com/@Degens/betting-without-eth-dais-new-permit-feature-5517293f3246) each exposing methods to facilitate third-party gas payment.
 >
@@ -37,6 +37,16 @@ To enable GMTX on a smart contract follow the following steps:
 That's it! You can see an example usecase [here](https://github.com/Amxx/GMTX/blob/master/core/contracts/utils/MessageHub.sol). Live frontend is [here](https://gmtx.app.hadriencroubois.com).
 
 ### Security concerns
+
+GMTX has been designed with security in mind. Still, this is early work and we do not recommand to use it in production just yet. Review by the community is needed before to build trust on this design.
+
+**Dangerous cases:**
+
+- Your smart contracts allows user to perform arbitrary calls to any address (`address(...).call(...)`):
+	- **DO NOT USE GMTX !** (users can impersonate someone else)
+- Your smart contracts performs calls to itself (`address(this).call(...)`):
+	- **DO NOT USE GMTX !** (`_msgSender` is not reliable unless you append the right value at the end of calldata)
+
 
 ## How does it work?
 
