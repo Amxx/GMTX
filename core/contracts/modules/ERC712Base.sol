@@ -4,9 +4,10 @@ pragma experimental ABIEncoderV2;
 
 contract ERC712Base
 {
-	bytes32 public constant EIP712DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-	string  public name;
-	string  public version;
+	// bytes32 internal constant EIP712DOMAIN_TYPEHASH = keccak256(bytes("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"));
+	bytes32 internal constant EIP712DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
+	string  internal m_name;
+	string  internal m_version;
 
 	struct EIP712Domain
 	{
@@ -19,23 +20,23 @@ contract ERC712Base
 	constructor(string memory _name, string memory _version)
 	public
 	{
-		name    = _name;
-		version = _version;
+		m_name    = _name;
+		m_version = _version;
 	}
 
-	function chainID()
-	public pure returns(uint256 id)
+	function _chainID()
+	internal pure returns(uint256 id)
 	{
 		assembly { id := chainid() }
 	}
 
-	function domain()
-	public view returns(EIP712Domain memory)
+	function _domain()
+	internal view returns(EIP712Domain memory)
 	{
 		return EIP712Domain({
-			name:              name
-		, version:           version
-		, chainId:           chainID()
+			name:              m_name
+		, version:           m_version
+		, chainId:           _chainID()
 		, verifyingContract: address(this)
 		});
 	}

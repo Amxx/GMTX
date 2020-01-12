@@ -1,6 +1,6 @@
 {
-  "name": "GMTX",
-  "version": "0.0.21",
+  "name": "GMTX-solidity",
+  "version": "0.0.1",
   "description": "A toolkit for Generalized Meta Transactions",
   "main": "truffle.js",
   "scripts": {
@@ -16,8 +16,8 @@
     "url": "https://github.com/amxx/GMTX.git/issues"
   },
   "files": [
-    "/contracts",
-    "/utils"
+    "/build",
+    "/contracts"
   ],
   "author": "Hadrien Croubois",
   "license": "MIT",

@@ -35,7 +35,7 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 
 	function receiveMetaTx(GMTX memory _metatx, bytes memory _signature) public payable
 	{
-		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(domain()));
+		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(_domain()));
 
 		// check signature
 		require(_checkSignature(_metatx.sender, digest, _signature), 'GMTX/invalid-signature');
@@ -79,5 +79,11 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		bytes memory data   = msg.data;
 		uint256      length = msg.data.length;
 		assembly { sender := and(mload(add(data, length)), 0xffffffffffffffffffffffffffffffffffffffff) }
+	}
+
+	function gmtx_domain()
+	public view returns(EIP712Domain memory)
+	{
+		return _domain();
 	}
 }
