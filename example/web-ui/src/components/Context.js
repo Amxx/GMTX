@@ -2,8 +2,9 @@ import React from "react";
 import { EventEmitter } from 'fbemitter';
 import { ethers } from 'ethers';
 
-import config     from '../config/config';
-import MessageHub from '../abis/MessageHub.json';
+import config       from '../config/config';
+import GMTXReceiver from '../abis/GMTXReceiver.json';
+import MessageHub   from '../abis/MessageHub.json';
 
 export const Context = React.createContext({});
 
@@ -38,8 +39,9 @@ class ContextProvider extends React.Component
 			// variables
 			emitter:    new EventEmitter(),
 			signer:     new ethers.providers.Web3Provider(window.ethereum),
+			interface:  new ethers.utils.Interface(MessageHub.abi),
+			target:     null,
 			config:     config,
-			contracts:  {},
 			// methods
 			getNetwork: this.getNetwork,
 			getWallet:  this.getWallet,
@@ -72,17 +74,16 @@ class ContextProvider extends React.Component
 			const network  = this.getNetwork();
 			const provider = ethers.getDefaultProvider(network.name);
 			const wallet   = new ethers.Wallet(network.relayer, provider);
-			const contract = new ethers.Contract(network.address, MessageHub.abi, wallet);
-			this.setState({ contract, });
+			const target   = new ethers.Contract(network.address, GMTXReceiver.abi, wallet);
 
-			// addListener
+			this.setState({ target });
 
 			// notify
 			this.state.emitter.emit('Notify', 'success', 'Connection successfull');
 		}
 		catch
 		{
-			this.setState({ contracts: null });
+			this.setState({ target: null });
 
 			// notify
 			this.state.emitter.emit('Notify', 'error', 'Please switch to goerli.', 'Service unavailable on this network');
@@ -137,7 +138,7 @@ class ContextProvider extends React.Component
 		// produce signature
 		return new Promise((resolve, reject) => {
 			// retreive domain
-			this.state.contract.domain()
+			this.state.target.gmtx_domain()
 			.then(domain => {
 				// build data
 				const data = JSON.stringify({
@@ -173,7 +174,7 @@ class ContextProvider extends React.Component
 	}
 
 	gmtx_relay = (gmtx, signature) => {
-		return this.state.contract.receiveMetaTx(gmtx, signature);
+		return this.state.target.receiveMetaTx(gmtx, signature);
 	}
 
 	render() {

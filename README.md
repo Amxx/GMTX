@@ -40,7 +40,7 @@ To enable GMTX on a smart contract follow the following steps:
 - Inherit from the [GMTXReceiver contract](https://github.com/Amxx/GMTX/tree/master/core/contracts).
 - Replace all references to `msg.sender` with call to the internal function `_msgSender()`.
 
-That's it! You can see an example usecase [here](https://github.com/Amxx/GMTX/blob/master/core/contracts/utils/MessageHub.sol). Live frontend is [here](https://gmtx.app.hadriencroubois.com).
+That's it! You can see an example usecase [here](https://github.com/Amxx/GMTX/blob/master/example/solidity/contracts/MessageHub.sol). Live frontend is [here](https://gmtx.app.hadriencroubois.com).
 
 ### Security concerns
 
@@ -78,16 +78,10 @@ Meta-transactions can we relayed by anyone, with no restriction. Once the validi
 
 Additional public functions include:
 
-- `EIP712DOMAIN_TYPEHASH() returns (bytes32)`: Typehash of the domain struct used for ERC712 signature
-- `name() returns (string)`: Name of the protocole (included in the ERC712 domain)
-- `version() returns (string)`: Version of the protocole (included in the ERC712 domain)
-- `chainID() returns (uint256)`: ChainId (included in the ERC712 domain)
-- `domain() returns (Domain)`: Entire domain used for ERC712 signature.
+- `gmtx_domain() returns (Domain)`: Domain used for ERC712 signature. Includes name and version of the signature protocole, chainId, and address of the verifying contract.
 - `gmtx_mirror() returns (address)`: Target used for relayed transaction. Can be the GMTXReceiver itself or a mirror (see Direct vs Mirror Mode).
 - `gmtx_replay(bytes32) returns (bool)`: Status of the meta-transaction. Given a GMTX digest, tells weither this meta-transaction has already been relayed or not. Used for replay protection.
 - `gmtx_nonce(address) returns (uint256)`: Nonce of the account. Nonce can optionnaly be used to force meta-transaction ordering.
-
-**/!\\ Some of these might be removed or renamed to avoid conflicts. /!\\**
 
 Meta-transaction verification include the following checks:
 

@@ -8,7 +8,7 @@ class MessageForm extends React.Component
 
 		this.props.context.GMTX.sign({
 			sender: this.props.context.getWallet(),
-			data:   this.props.context.contract.interface.functions.publish.encode([event.target[0].value])
+			data:   this.props.context.interface.functions.publish.encode([event.target[0].value])
 		})
 		.then(({gmtx, signature}) => {
 			this.props.context.emitter.emit("Notify", "info", "Sending meta transaction to relayer...","Meta transaction succesfully signed");
