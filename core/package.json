@@ -4,9 +4,7 @@
   "description": "A toolkit for Generalized Meta Transactions",
   "main": "truffle.js",
   "scripts": {
-    "build": "truffle compile",
-    "test": "truffle test",
-    "coverage": "solidity-coverage"
+    "build": "truffle compile"
   },
   "repository": {
     "type": "git",
@@ -23,12 +21,6 @@
   "license": "MIT",
   "homepage": "https://github.com/amxx/GMTX.git#readme",
   "devDependencies": {
-    "@openzeppelin/test-helpers": "0.5.4",
-    "@truffle/hdwallet-provider": "1.0.28",
-    "chai": "4.2.0",
-    "eth-sig-util": "2.5.2",
-    "ganache-cli": "6.8.1",
-    "husky": "4.0.4",
     "truffle": "5.1.7"
   }
 }
