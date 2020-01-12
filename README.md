@@ -58,7 +58,51 @@ GMTX has been designed with security in mind. Still, this is early work and we d
 
 ### GMTXReceiver smart contract
 
+To enable meta-transaction support, the contract must inherit from the GMTXReceiver. This will expose a function `receiveMetaTx(GMTX, bytes) public payable`. This is the endpoint that processes meta-transaction.
+
+GMTX meta-transaction are structures signed using the ERC712 pattern.
+
+```
+struct GMTX
+{
+	address sender;
+	bytes   data;
+	uint256 value;
+	uint256 nonce;
+	uint256 expiry;
+	bytes32 salt;
+}
+```
+
+Meta-transactions can we relayed by anyone, with no restriction. Once the validity of the meta-transaction has been verified, the `receiveMetaTx` function will relay the call described by the `data` field has if it was send by `sender`. To do that, the `receiveMetaTx` appends the `sender` to the end of the calldata. This additional information does not affect the forwarded call but it processed by the `_msgSender()` internal method to accurately return the `sender` of the meta-transaction when it identifies a relayed call.
+
+Additional public functions include:
+
+- `EIP712DOMAIN_TYPEHASH() returns (bytes32)`: Typehash of the domain struct used for ERC712 signature
+- `name() returns (string)`: Name of the protocole (included in the ERC712 domain)
+- `version() returns (string)`: Version of the protocole (included in the ERC712 domain)
+- `chainID() returns (uint256)`: ChainId (included in the ERC712 domain)
+- `domain() returns (Domain)`: Entire domain used for ERC712 signature.
+- `gmtx_mirror() returns (address)`: Target used for relayed transaction. Can be the GMTXReceiver itself or a mirror (see Direct vs Mirror Mode).
+- `gmtx_replay(bytes32) returns (bool)`: Status of the meta-transaction. Given a GMTX digest, tells weither this meta-transaction has already been relayed or not. Used for replay protection.
+- `gmtx_nonce(address) returns (uint256)`: Nonce of the account. Nonce can optionnaly be used to force meta-transaction ordering.
+
+**/!\\ Some of these might be removed or renamed to avoid conflicts. /!\\**
+
+Meta-transaction verification include the following checks:
+
+- The signature must comply with ERC712 standard. If the sender is an EOA then ecrecover is used, otherwise, the signature verification falls back to sender using the ERC1271 interface.
+- The GMTX nonce field must either be 0 (implicitelly disabling the check) or equal to the current nonce of the sender + 1.
+- The GMTX expiry field must eitger be 0 (implicitelly disabling the check) or greater then the current timestamp. This gives an expiry date to meta-transaction.
+- The GMTX value field must be equal to the value sent by the relayer. This allows the sender to ask for some either to be send with the relayed meta-transaction. Economics of the relayer are beyound the scope of the standard and must be established between the user and the relayer.
+
 ### Direct vs Mirror Mode
+
+If the contract uses calls to itself as part of it's normal operation, the `_msgSender()` might not behave correctly as it might mistake those self calls for relayed calls, and extract a sender value from the end of non-prepared data. To avoid that we must establish a distinction between calls to self and relayer calls by using a mirror.
+
+Rather then calling itself with the relayed call data, the GMTXReceiver will send the call to a mirror contract that will send the message, untouched, back to the GMTXReceiver. This will cause the relayed call to have a `msg.sender` equal to the mirror's address, which is different from the GMTXReceiver, thus providing a way to distinguish between calls to self and relayed calls.
+
+Enabling the mirror mode is achieved by passing `true` to the GMTXReceiver's constructor.
 
 ### Writting and signing a gmtx meta-transaction
 
