@@ -21,15 +21,15 @@ From Metamask's [post](https://medium.com/metamask/announcing-a-generalized-meta
 >
 > Even once we support contract accounts, we expect there will still be some normal, external-key-based accounts, either to reduce the cost of publishing a contract for the account, or because a key may be used to manage a very small quantity of funds or permissions.
 
-### Why should I consider it for my dapp
-
-Using the GMTX toolkit will simply had generalized meta-transaction to your smart contract, without the need to duplicate code between the "classic" methods and the "meta-transaction enabled" ones. All public and external methods are automatically accessible through ERC712 signed messages, opening gas-free options for your users.
-
-### Whats difficult about it?
+### How is that different from the current state of the art?
 
 Account based meta-transaction are pretty well understood, and some actual products are currently making use of this design. [Argent](https://www.argent.xyz/) has been using meta-transaction for a long time, and it works great without users even knowing about it. [UniversalLogin](https://universallogin.io/) is proposing an amazing toolkit to deploy meta-transaction powered multisig and have web3 application interact with it. Many other projects (uport, gnosis, authereum, kitsune-wallet, ..., i'm sure i'm forgeting some) are also working in this space, and they all have one thing in common: each user has its own smart contract that relays metatransaction, and the address of this proxy is the "identity" of the user. This is the address apps see, its often associated with an ENS name, and its the address actually owning the user's assets. These user owned smart contracts can implement many security / recovery features but they are expensive to deploy, and are only worth it once the user as some assets that are really worth securing (here we could talk about counterfactual deployment and predictable addresses, but its not really today's topic).
 
 Contract based meta-transaction, like the one used by Dai in the `permit` method are very different. As they are not relayed by a proxy, the `msg.sender` seen by the app is not the identity of the user. This is one of the main drawback of the [GSN](https://gsn.openzeppelin.com/) which needs proxy on top of it to accurately identify the users. If you don't want to deploy one proxy per user, but you still want an app to understand which user is interacting with you, regardless of who relays the transaction, then the app needs an additional mechanism to understand the true origin of a meta-transaction. Dai did it in the restricted context of their own smart contract, GMTX tries to provide a framework for any app to do so as easily as possible.
+
+### Why should I consider it for my dapp
+
+Using the GMTX toolkit will simply had generalized meta-transaction to your smart contract, without the need to duplicate code between the "classic" methods and the "meta-transaction enabled" ones. All public and external methods are automatically accessible through ERC712 signed messages, opening gas-free options for your users.
 
 ## Using GMTX in my dapp
 
