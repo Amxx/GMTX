@@ -35,7 +35,7 @@ Using the GMTX toolkit will simply had generalized meta-transaction to your smar
 
 ### How to?
 
-To enable GMTX on a smart contract follow the following steps:
+To enable GMTX on a smart contract follow these steps:
 
 - Inherit from the [GMTXReceiver contract](https://github.com/Amxx/GMTX/tree/master/core/contracts).
 - Replace all references to `msg.sender` with call to the internal function `_msgSender()`.
@@ -116,7 +116,7 @@ Once completed, the structure is to be signed using ERC712. The ERC712 domain us
 	name:              "GeneralizedMetaTX",
 	version:           "0.0.1-beta.1",
 	chainId:           <network id>,
-	verifyingContract: <address of target address>
+	verifyingContract: <address of target contract>
 }
 ```
 
