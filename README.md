@@ -128,8 +128,8 @@ The address of the targeted smart contract, GMTX structure, signature should whe
 struct ExtendedGMTX
 {
 	address target;
-    GMTX    gmtx;
-    bytes   signature;
+	GMTX    gmtx;
+	bytes   signature;
 }
 ```
 
