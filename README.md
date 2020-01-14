@@ -115,8 +115,8 @@ Once completed, the structure is to be signed using ERC712. The ERC712 domain us
 {
 	name:              "GeneralizedMetaTX",
 	version:           "0.0.1-beta.1",
-	chainId:           network id,
-	verifyingContract: address of target address,
+	chainId:           <network id>,
+	verifyingContract: <address of target address>
 }
 ```
 
