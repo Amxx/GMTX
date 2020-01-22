@@ -13,6 +13,18 @@ function extractEvents(txMined, address, name)
 	return txMined.logs.filter((ev) => { return ev.address == address && ev.event == name });
 }
 
+function prepareGMTX(sender, target, func, args, value, nonce, expiry, salt)
+{
+	return {
+		sender,
+		data:   target.contract.methods[func](...args).encodeABI(),
+		value:  value  || 0,
+		nonce:  nonce  || 0,
+		expiry: expiry || 0,
+		salt:   salt   || web3.utils.randomHex(32),
+	}
+}
+
 contract('GasRepayer', async (accounts) => {
 
 	/***************************************************************************
@@ -55,36 +67,28 @@ contract('GasRepayer', async (accounts) => {
 	describe('MessageHub', async () => {
 		describe('relayed call', async () => {
 			it('prepare gmtx', async () => {
-				args = [
-					'relayed-call-test',
-				];
 
-				messagehub_gmtx = {
-					sender: accounts[2],
-					data:   MessageHubInstance.contract.methods.publish(...args).encodeABI(),
-					value:  0,
-					nonce:  0,
-					expiry: 0,
-					salt:   web3.utils.randomHex(32),
-				};
+				messagehub_gmtx = prepareGMTX(
+					accounts[2],
+					MessageHubInstance,
+					'publish(string)',
+					[
+						'relayed-call-test',
+					],
+				);
 				messagehub_sign = await tools.sign(messagehub_gmtx, MessageHubInstance, wallets.privateKeys[accounts[2].toLowerCase()]);
 
-				// target, call, gasPrice, gasAmount
-				args = [
-					MessageHubInstance.address,
-					MessageHubInstance.contract.methods.receiveMetaTx(messagehub_gmtx, messagehub_sign).encodeABI(),
-					GAS_PRICE,
-					100000,
-				];
-
-				gasrelayer_gmtx = {
-					sender: accounts[1],
-					data:   GasRepayerInstance.contract.methods.relayAndRepay(...args).encodeABI(),
-					value:  0,
-					nonce:  0,
-					expiry: 0,
-					salt:   web3.utils.randomHex(32),
-				};
+				gasrelayer_gmtx = prepareGMTX(
+					accounts[1],
+					GasRepayerInstance,
+					'relayAndRepay(address,bytes,uint256,uint256)',
+					[
+						MessageHubInstance.address,
+						MessageHubInstance.contract.methods.receiveMetaTx(messagehub_gmtx, messagehub_sign).encodeABI(),
+						GAS_PRICE,
+						100000,
+					],
+				);
 				gasrelayer_sign  = await tools.sign(gasrelayer_gmtx, GasRepayerInstance, wallets.privateKeys[accounts[1].toLowerCase()]);
 
 
@@ -113,7 +117,7 @@ contract('GasRepayer', async (accounts) => {
 
 			it('tx', async () => {
 				txMined = await GasRepayerInstance.receiveMetaTx(gasrelayer_gmtx, gasrelayer_sign, { from: accounts[0] });
-				
+
 				// Not instrumented correctly by truffle
 				// events = extractEvents(txMined, MessageHubInstance.address, 'NewMessage');
 				// assert.equal(events.length,          1);
