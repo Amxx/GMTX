@@ -13,15 +13,17 @@ function extractEvents(txMined, address, name)
 	return txMined.logs.filter((ev) => { return ev.address == address && ev.event == name });
 }
 
-function prepareGMTX(sender, target, func, args, value, nonce, expiry, salt)
+async function prepareGMTX(gmtx)
 {
+	const call = gmtx.target.contract.methods[gmtx.selector](...gmtx.args)
 	return {
-		sender,
-		data:   target.contract.methods[func](...args).encodeABI(),
-		value:  value  || 0,
-		nonce:  nonce  || 0,
-		expiry: expiry || 0,
-		salt:   salt   || web3.utils.randomHex(32),
+		from:   gmtx.from,
+		data:   call.encodeABI(),
+		gas:    gmtx.gas    || await call.estimateGas(),
+		value:  gmtx.value  || 0,
+		nonce:  gmtx.nonce  || 0,
+		expiry: gmtx.expiry || 0,
+		salt:   gmtx.salt   || web3.utils.randomHex(32),
 	}
 }
 
@@ -61,7 +63,7 @@ contract('GasRepayer', async (accounts) => {
 
 		it('deposit to gasrepayer contract', async () => {
 			const value = 1 * 10 ** 18;
-			await web3.eth.sendTransaction({ from: repayer, to: GasRepayerInstance.address, value });
+			await GasRepayerInstance.mint({ from: repayer, value })
 			assert.equal(await GasRepayerInstance.balanceOf(repayer), value);
 		});
 	});
@@ -69,30 +71,29 @@ contract('GasRepayer', async (accounts) => {
 	describe('MessageHub', async () => {
 		describe('relayed call', async () => {
 			it('prepare gmtx', async () => {
-
 				// User meta-transaction
-				messagehub_gmtx = prepareGMTX(
-					user,
-					MessageHubInstance,
-					'publish(string)',
-					[
+				messagehub_gmtx = await prepareGMTX({
+					from:     user,
+					target:   MessageHubInstance,
+					selector: 'publish(string)',
+					args: [
 						'relayed-call-test',
 					],
-				);
+				});
 				messagehub_sign = await tools.sign(messagehub_gmtx, MessageHubInstance, wallets.privateKeys[user.toLowerCase()]);
 
 				// Repayer meta-transaction (wraps the user-metatransaction)
-				gasrelayer_gmtx = prepareGMTX(
-					repayer,
-					GasRepayerInstance,
-					'relayAndRepay(address,bytes,uint256,uint256)',
-					[
+				gasrelayer_gmtx = await prepareGMTX({
+					from:     repayer,
+					target:   GasRepayerInstance,
+					selector: 'relayAndRepay(address,bytes,uint256)',
+					args: [
 						MessageHubInstance.address,
 						MessageHubInstance.contract.methods.receiveMetaTx(messagehub_gmtx, messagehub_sign).encodeABI(),
 						GAS_PRICE,
-						100000,
 					],
-				);
+					gas: 100000, // preparation fails due to ERC20 burn
+				});
 				gasrelayer_sign  = await tools.sign(gasrelayer_gmtx, GasRepayerInstance, wallets.privateKeys[repayer.toLowerCase()]);
 
 				// Only for MessageHub purposes

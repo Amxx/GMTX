@@ -12,8 +12,9 @@ const TYPES =
 		{ name: "verifyingContract", type: "address" },
 	],
 	GMTX: [
-		{ name: "sender", type: "address" },
+		{ name: "from",   type: "address" },
 		{ name: "data",   type: "bytes"   },
+		{ name: "gas",    type: "uint256" },
 		{ name: "value",  type: "uint256" },
 		{ name: "nonce",  type: "uint256" },
 		{ name: "expiry", type: "uint256" },
@@ -24,8 +25,9 @@ const TYPES =
 function sanitize(gmtx)
 {
 	return {
-		// sender is necessary
+		// from is necessary
 		// data is necessary
+		// gas is necessary
 		value:  0,
 		nonce:  0,
 		expiry: 0,
@@ -52,9 +54,10 @@ function sign(gmtx, target, pk)
 				},
 				message:
 				{
-					sender: gmtx.sender.toString(),
+					from:   gmtx.from.toString(),
 					data:   gmtx.data,
 					value:  gmtx.value.toString(),
+					gas:    gmtx.gas.toString(),
 					nonce:  gmtx.nonce.toString(),
 					expiry: gmtx.expiry.toString(),
 					salt:   gmtx.salt.toString()
@@ -80,14 +83,8 @@ function sign(gmtx, target, pk)
 	});
 }
 
-function inline(gmtx)
-{
-	return [[gmtx.sender, gmtx.data, gmtx.value, gmtx.nonce, gmtx.expiry, gmtx.salt]];
-}
-
 module.exports = {
 	TYPES,
 	sanitize,
 	sign,
-	inline,
 }

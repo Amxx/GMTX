@@ -11,8 +11,7 @@ contract GasRepayer is ERC20, ERC20Detailed, GMTXReceiver
 {
 	using SafeMath for uint256;
 
-	// uint256 constant internal FLAT_GAS_USAGE = 138320;
-	uint256 constant internal FLAT_GAS_USAGE = 119020;// + 19300;
+	uint256 constant internal FLAT_GAS_USAGE = 119360;
 
 	event CallOutcome(bool success, bytes returnData);
 
@@ -22,11 +21,7 @@ contract GasRepayer is ERC20, ERC20Detailed, GMTXReceiver
 	ERC20Detailed("", "", 18)
 	{}
 
-	function relayAndRepay(
-		address payable  target,
-		bytes   calldata call,
-		uint256          gasPrice,
-		uint256          gasAmount)
+	function relayAndRepay(address payable target, bytes calldata call, uint256 gasPrice)
 	external payable
 	{
 		uint256         gasBefore = gasleft();
@@ -41,7 +36,7 @@ contract GasRepayer is ERC20, ERC20Detailed, GMTXReceiver
 		{
 			// TODO: append relayer and repayer (eq. sender) for an equivalent to GSN?
 			// (bool success, bytes memory returnData) = target.call.value(msg.value).gas(gasAmount)(abi.encodePacked(call, relayer, repayer));
-			(bool success, bytes memory returnData) = target.call.value(msg.value).gas(gasAmount)(call);
+			(bool success, bytes memory returnData) = target.call.value(msg.value)(call);
 			emit CallOutcome(success, returnData);
 		}
 

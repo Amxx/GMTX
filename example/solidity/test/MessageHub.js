@@ -12,15 +12,17 @@ function extractEvents(txMined, address, name)
 	return txMined.logs.filter((ev) => { return ev.address == address && ev.event == name });
 }
 
-function prepareGMTX(sender, target, func, args, value, nonce, expiry, salt)
+async function prepareGMTX(gmtx)
 {
+	const call = gmtx.target.contract.methods[gmtx.selector](...gmtx.args)
 	return {
-		sender,
-		data:   target.contract.methods[func](...args).encodeABI(),
-		value:  value  || 0,
-		nonce:  nonce  || 0,
-		expiry: expiry || 0,
-		salt:   salt   || web3.utils.randomHex(32),
+		from:   gmtx.from,
+		data:   call.encodeABI(),
+		value:  gmtx.value  || 0,
+		gas:    gmtx.gas    || await call.estimateGas(),
+		nonce:  gmtx.nonce  || 0,
+		expiry: gmtx.expiry || 0,
+		salt:   gmtx.salt   || web3.utils.randomHex(32),
 	}
 }
 
@@ -62,14 +64,14 @@ contract('MessageHub', async (accounts) => {
 
 		describe('relayed call', async () => {
 			it('prepare gmtx', async () => {
-				gmtx = prepareGMTX(
-					accounts[1],
-					MessageHubInstance,
-					'publish(string)',
-					[
+				gmtx = await prepareGMTX({
+					from:     accounts[1],
+					target:   MessageHubInstance,
+					selector: 'publish(string)',
+					args: [
 						'relayed-call-test',
 					],
-				);
+				});
 				sign = await tools.sign(gmtx, MessageHubInstance, wallets.privateKeys[accounts[1].toLowerCase()]);
 
 				// Only for MessageHub purposes
