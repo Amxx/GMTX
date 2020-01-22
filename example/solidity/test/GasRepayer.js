@@ -143,8 +143,8 @@ contract('GasRepayer', async (accounts) => {
 				events = extractEvents(txMined, GasRepayerInstance.address, 'Transfer');
 				assert.equal(events.length,             1);
 
-				console.log(Number(events[0].args.value));
-				console.log(txMined.receipt.cumulativeGasUsed * GAS_PRICE);
+				// console.log(Number(events[0].args.value));
+				// console.log(txMined.receipt.cumulativeGasUsed * GAS_PRICE);
 				console.log("net gas cost:", ((txMined.receipt.cumulativeGasUsed * GAS_PRICE) - Number(events[0].args.value)) / GAS_PRICE);
 			});
 

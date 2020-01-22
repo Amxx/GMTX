@@ -39,7 +39,9 @@ contract GasRepayer is ERC20, ERC20Detailed, GMTXReceiver
 		}
 		else
 		{
-			(bool success, bytes memory returnData) = target.call.value(msg.value).gas(gasAmount)(abi.encodePacked(call, relayer, repayer));
+			// TODO: append relayer and repayer (eq. sender) for an equivalent to GSN?
+			// (bool success, bytes memory returnData) = target.call.value(msg.value).gas(gasAmount)(abi.encodePacked(call, relayer, repayer));
+			(bool success, bytes memory returnData) = target.call.value(msg.value).gas(gasAmount)(call);
 			emit CallOutcome(success, returnData);
 		}
 
