@@ -17,11 +17,11 @@ contract ERC712Base
 		address verifyingContract;
 	}
 
-	constructor(string memory _name, string memory _version)
+	constructor(string memory name, string memory version)
 	public
 	{
-		m_name    = _name;
-		m_version = _version;
+		m_name    = name;
+		m_version = version;
 	}
 
 	function _chainID()
@@ -41,15 +41,15 @@ contract ERC712Base
 		});
 	}
 
-	function _hash(EIP712Domain memory _domain)
+	function _hash(EIP712Domain memory domain)
 	internal pure returns (bytes32 domainhash)
 	{
 		return keccak256(abi.encode(
 			EIP712DOMAIN_TYPEHASH
-		, keccak256(bytes(_domain.name))
-		, keccak256(bytes(_domain.version))
-		, _domain.chainId
-		, _domain.verifyingContract
+		, keccak256(bytes(domain.name))
+		, keccak256(bytes(domain.version))
+		, domain.chainId
+		, domain.verifyingContract
 		));
 	}
 

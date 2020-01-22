@@ -23,17 +23,17 @@ contract ERC712GMTX is ERC712Base
 	public ERC712Base("GeneralizedMetaTX", "0.0.1-beta.1")
 	{}
 
-	function _hash(GMTX memory _metatx)
+	function _hash(GMTX memory metatx)
 	internal pure returns (bytes32 metatxhash)
 	{
 		return keccak256(abi.encode(
 			GMTX_TYPEHASH
-		, _metatx.sender
-		, keccak256(_metatx.data)
-		, _metatx.value
-		, _metatx.nonce
-		, _metatx.expiry
-		, _metatx.salt
+		, metatx.sender
+		, keccak256(metatx.data)
+		, metatx.value
+		, metatx.nonce
+		, metatx.expiry
+		, metatx.salt
 		));
 	}
 }

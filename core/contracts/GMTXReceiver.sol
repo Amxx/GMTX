@@ -8,7 +8,8 @@ contract GMTXMirror
 {
 	function () payable external
 	{
-		address(msg.sender).call.value(msg.value)(msg.data);
+		(bool success, bytes memory returnData) = address(msg.sender).call.value(msg.value)(msg.data);
+		require(success, string(returnData));
 	}
 }
 
@@ -54,8 +55,8 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		// check value
 		require(_metatx.value == msg.value, 'GMTX/invalid-value');
 
-		// forward call: msg.sender = address(this), real sender, is appended at the end of calldata
-		(bool success, bytes memory returndata) = gmtx_mirror.call.value(msg.value)(abi.encodePacked(_metatx.data, _metatx.sender));
+		// forward call: msg.sender = address(this), relayer and real sender are appended at the end of calldata
+		(bool success, bytes memory returndata) = gmtx_mirror.call.value(msg.value)(abi.encodePacked(_metatx.data, msg.sender, _metatx.sender));
 
 		if (success)
 		{
@@ -70,15 +71,29 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 	function _msgSender()
 	internal view returns (address payable sender)
 	{
-		return (msg.sender == gmtx_mirror) ? _getRelayedSender() : msg.sender;
+		return (msg.sender == gmtx_mirror) ? _extractSender() : msg.sender;
 	}
 
-	function _getRelayedSender()
+	function _msgRelayer()
+	internal view returns (address payable sender)
+	{
+		return (msg.sender == gmtx_mirror) ? _extractRelayer() : msg.sender;
+	}
+
+	function _extractSender()
 	internal pure returns (address payable sender)
 	{
 		bytes memory data   = msg.data;
 		uint256      length = msg.data.length;
-		assembly { sender := and(mload(add(data, length)), 0xffffffffffffffffffffffffffffffffffffffff) }
+		assembly { sender := and(mload(sub(add(data, length), 0x00)), 0xffffffffffffffffffffffffffffffffffffffff) }
+	}
+
+	function _extractRelayer()
+	internal pure returns (address payable relayer)
+	{
+		bytes memory data   = msg.data;
+		uint256      length = msg.data.length;
+		assembly { relayer := and(mload(sub(add(data, length), 0x14)), 0xffffffffffffffffffffffffffffffffffffffff) }
 	}
 
 	function gmtx_domain()

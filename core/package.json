@@ -1,6 +1,6 @@
 {
   "name": "gmtx-solidity",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A toolkit for Generalized Meta Transactions",
   "main": "truffle.js",
   "scripts": {
@@ -21,6 +21,6 @@
   "license": "MIT",
   "homepage": "https://github.com/amxx/GMTX.git#readme",
   "devDependencies": {
-    "truffle": "5.1.7"
+    "truffle": "^5.1.9"
   }
 }
