@@ -27,6 +27,8 @@ function prepareGMTX(sender, target, func, args, value, nonce, expiry, salt)
 
 contract('GasRepayer', async (accounts) => {
 
+	const [relayer, repayer, user] = accounts;
+
 	/***************************************************************************
 	 *                        Environment configuration                        *
 	 ***************************************************************************/
@@ -57,10 +59,10 @@ contract('GasRepayer', async (accounts) => {
 			assert.equal(gasrelayer_domain.verifyingContract, GasRepayerInstance.address);
 		});
 
-		it('deposit', async () => {
+		it('deposit to gasrepayer contract', async () => {
 			const value = 1 * 10 ** 18;
-			await web3.eth.sendTransaction({ from: accounts[1], to: GasRepayerInstance.address, value });
-			assert.equal(await GasRepayerInstance.balanceOf(accounts[1]), value);
+			await web3.eth.sendTransaction({ from: repayer, to: GasRepayerInstance.address, value });
+			assert.equal(await GasRepayerInstance.balanceOf(repayer), value);
 		});
 	});
 
@@ -68,18 +70,20 @@ contract('GasRepayer', async (accounts) => {
 		describe('relayed call', async () => {
 			it('prepare gmtx', async () => {
 
+				// User meta-transaction
 				messagehub_gmtx = prepareGMTX(
-					accounts[2],
+					user,
 					MessageHubInstance,
 					'publish(string)',
 					[
 						'relayed-call-test',
 					],
 				);
-				messagehub_sign = await tools.sign(messagehub_gmtx, MessageHubInstance, wallets.privateKeys[accounts[2].toLowerCase()]);
+				messagehub_sign = await tools.sign(messagehub_gmtx, MessageHubInstance, wallets.privateKeys[user.toLowerCase()]);
 
+				// Repayer meta-transaction (wraps the user-metatransaction)
 				gasrelayer_gmtx = prepareGMTX(
-					accounts[1],
+					repayer,
 					GasRepayerInstance,
 					'relayAndRepay(address,bytes,uint256,uint256)',
 					[
@@ -89,8 +93,7 @@ contract('GasRepayer', async (accounts) => {
 						100000,
 					],
 				);
-				gasrelayer_sign  = await tools.sign(gasrelayer_gmtx, GasRepayerInstance, wallets.privateKeys[accounts[1].toLowerCase()]);
-
+				gasrelayer_sign  = await tools.sign(gasrelayer_gmtx, GasRepayerInstance, wallets.privateKeys[repayer.toLowerCase()]);
 
 				// Only for MessageHub purposes
 				_messagehub_digest = '0x'+TypedDataUtils.sign({
@@ -109,19 +112,19 @@ contract('GasRepayer', async (accounts) => {
 			});
 
 			it('before', async () => {
-				assert.equal(await MessageHubInstance.gmtx_nonce(accounts[2]), 0);
-				assert.equal(await GasRepayerInstance.gmtx_nonce(accounts[1]), 0);
-				assert.equal(await MessageHubInstance.gmtx_replay(_messagehub_digest), false);
+				assert.equal(await GasRepayerInstance.gmtx_nonce(repayer), 0);
+				assert.equal(await MessageHubInstance.gmtx_nonce(user),    0);
 				assert.equal(await GasRepayerInstance.gmtx_replay(_gasrelayer_digest), false);
+				assert.equal(await MessageHubInstance.gmtx_replay(_messagehub_digest), false);
 			});
 
 			it('tx', async () => {
-				txMined = await GasRepayerInstance.receiveMetaTx(gasrelayer_gmtx, gasrelayer_sign, { from: accounts[0] });
+				txMined = await GasRepayerInstance.receiveMetaTx(gasrelayer_gmtx, gasrelayer_sign, { from: relayer });
 
 				// Not instrumented correctly by truffle
 				// events = extractEvents(txMined, MessageHubInstance.address, 'NewMessage');
 				// assert.equal(events.length,          1);
-				// assert.equal(events[0].args.sender,  accounts[1]);
+				// assert.equal(events[0].args.sender,  repayer);
 				// assert.equal(events[0].args.message, 'relayed-call-test');
 
 				events = extractEvents(txMined, MessageHubInstance.address, 'GMTXReceived');
@@ -146,10 +149,10 @@ contract('GasRepayer', async (accounts) => {
 			});
 
 			it('after', async () => {
-				assert.equal(await MessageHubInstance.gmtx_nonce(accounts[2]), 1);
-				assert.equal(await GasRepayerInstance.gmtx_nonce(accounts[1]), 1);
-				assert.equal(await MessageHubInstance.gmtx_replay(_messagehub_digest), true);
+				assert.equal(await GasRepayerInstance.gmtx_nonce(repayer), 1);
+				assert.equal(await MessageHubInstance.gmtx_nonce(user),    1);
 				assert.equal(await GasRepayerInstance.gmtx_replay(_gasrelayer_digest), true);
+				assert.equal(await MessageHubInstance.gmtx_replay(_messagehub_digest), true);
 			});
 		});
 	});
