@@ -1,5 +1,9 @@
 # GMTX - A protocol for generalized meta-transaction
 
+## Live demo
+
+Lazy reading this document? Just want a demo? [Here is the link (switch you metamask to goerli)](https://gmtx.app.hadriencroubois.com/).
+
 ## Introduction
 
 ### What is a meta-transaction?
@@ -140,12 +144,6 @@ In order to relay a meta-transaction, one should call the `receiveMetaTx(GMTX,by
 See the discussion [here](https://ethereum-magicians.org/t/lets-discuss-metamasks-hackathon-on-generalized-meta-transactions/3923/28).
 
 While GMTX doesn't include a repayment mechanism out of the box, it is possible to build a [relaying/repayment protocole based GMTX](https://github.com/Amxx/GMTX/blob/master/example/solidity/contracts/GasRepayer.sol). This approach allows for a clear separation between end-user, relayer and repayer.
-
-## Limitation
-
-### Meta-transaction refund
-
-Account based meta-transaction can easily refund the relayer as the proxy hold assets on behalf of the user and can use them for the refund. In our case, we want to avoid any assumption about the GMTXReceiver. In particular, we want the GMTX protocol to be compatible with contracts that do not control any fungible value on behalf of the user (such as the ENS contracts for example). This is why refunding the relayer is not part of this protocol and is left to future extensions.
 
 ## Authors & Contributors
 
