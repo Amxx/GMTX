@@ -69,8 +69,9 @@ GMTX meta-transaction are structures signed using the ERC712 pattern.
 ```
 struct GMTX
 {
-	address sender;
+	address from;
 	bytes   data;
+	uint256 gas;
 	uint256 value;
 	uint256 nonce;
 	uint256 expiry;
@@ -78,7 +79,7 @@ struct GMTX
 }
 ```
 
-Meta-transactions can we relayed by anyone, with no restriction. Once the validity of the meta-transaction has been verified, the `receiveMetaTx` function will relay the call described by the `data` field has if it was send by `sender`. To do that, the `receiveMetaTx` appends the `sender` to the end of the calldata. This additional information does not affect the forwarded call but it processed by the `_msgSender()` internal method to accurately return the `sender` of the meta-transaction when it identifies a relayed call.
+Meta-transactions can we relayed by anyone, with no restriction. Once the validity of the meta-transaction has been verified, the `receiveMetaTx` function will relay the call described by the `data` field has if it was send by `from`. To do that, the `receiveMetaTx` appends the `from` to the end of the calldata. This additional information does not affect the forwarded call but it processed by the `_msgSender()` internal method to accurately return the `from` of the meta-transaction when it identifies a relayed call.
 
 Additional public functions include:
 
@@ -106,8 +107,9 @@ Enabling the mirror mode is achieved by passing `true` to the GMTXReceiver's con
 
 As described earlier, GMTX meta-transaction is a structure containing 6 fields:
 
-- `sender`: sender of the meta-transaction, similarly to the `from` field of a regular transaction. It can either be an EOA or and ERC1271 compliant smart-contract.
+- `from`: sender of the meta-transaction, similarly to the `from` field of a regular transaction. It can either be an EOA or and ERC1271 compliant smart-contract.
 - `data`: data of the transaction, similarly to the `data` field of a regular transaction. This is what would have otherwise been sent. In our case it's just encapsulated into the GMTX meta-transaction.
+- `gas`: gas necessary to run the transaction, similarly to the `gas` field of a regular transaction.
 - `value`: value (in wei) to be sent with the meta-transaction, similarly to the `value` field of a regular transaction. While this protocol mandates that the relayer includes this value when relaying the meta-transaction, the economics of the relaying are beyond the scope of this document.
 - `nonce`: optional field, can be left to 0 to skip this test. Otherwise, meta-transaction are valid if an only if the nonce is one over the current value (accessible through the `gmtx_nonce` function). This can be used to force the ordering of multiple meta-transaction signed in batch.
 - `expiry`: optional field, can be left to 0 to skip this test. Otherwise, meta-transaction are valid if an only if the expiry is greater then the current timestamp. This can be used to implement mechanism such as "run this meta-transaction before Tuesday 8pm, or disregard it"
