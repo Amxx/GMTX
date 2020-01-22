@@ -39,11 +39,11 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(_domain()));
 
 		// check signature
-		require(_checkSignature(_metatx.sender, digest, _signature), 'GMTX/invalid-signature');
+		require(_checkSignature(_metatx.from, digest, _signature), 'GMTX/invalid-signature');
 
 		// check ordering
-		gmtx_nonce[_metatx.sender]++;
-		require(_metatx.nonce == 0 || _metatx.nonce == gmtx_nonce[_metatx.sender], 'GMTX/invalid-nonce');
+		gmtx_nonce[_metatx.from]++;
+		require(_metatx.nonce == 0 || _metatx.nonce == gmtx_nonce[_metatx.from], 'GMTX/invalid-nonce');
 
 		// check replay protection
 		require(!gmtx_replay[digest], 'GMTX/replay-prevention');
@@ -56,7 +56,7 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		require(_metatx.value == msg.value, 'GMTX/invalid-value');
 
 		// forward call: msg.sender = address(this), relayer and real sender are appended at the end of calldata
-		(bool success, bytes memory returndata) = gmtx_mirror.call.value(msg.value)(abi.encodePacked(_metatx.data, msg.sender, _metatx.sender));
+			(bool success, bytes memory returndata) = gmtx_mirror.call.gas(_metatx.gas).value(msg.value)(abi.encodePacked(_metatx.data, msg.sender, _metatx.from));
 
 		if (success)
 		{
