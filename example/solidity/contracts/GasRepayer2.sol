@@ -4,41 +4,30 @@ pragma experimental ABIEncoderV2;
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
-import 'gmtx-solidity/contracts/GMTXReceiver.sol';
+import '../../../core/contracts/GMTXReceiver.sol';
+// import 'gmtx-solidity/contracts/GMTXReceiver.sol';
 
 
-contract GasRepayer is ERC20, ERC20Detailed, GMTXReceiver
+contract GasRepayer2 is ERC20, ERC20Detailed, GMTXReceiver
 {
 	using SafeMath for uint256;
 
-	uint256 constant internal FLAT_GAS_USAGE = 119360;
-
-	event CallOutcome(bool success, bytes returnData);
+	uint256 constant internal FLAT_GAS_USAGE = 120140;
 
 	constructor()
 	public
 	GMTXReceiver(false)
-	ERC20Detailed("GasRepayerToken", "GRT", 18)
+	ERC20Detailed("GasRepayerToken2", "GRT2", 18)
 	{}
 
-	function relayAndRepay(address payable target, bytes calldata call, uint256 gasPrice)
-	external payable
+	function relayAndRepay(address target, GMTX memory metatx, bytes memory signature, uint256 gasPrice)
+	public payable
 	{
 		uint256         gasBefore = gasleft();
 		address payable repayer   = _msgSender();
 		address payable relayer   = _msgRelayer();
 
-		if (target == address(this))
-		{
-			emit CallOutcome(false, bytes("self-calls-forbided"));
-		}
-		else
-		{
-			// TODO: append relayer and repayer (eq. sender) for an equivalent to GSN?
-			// (bool success, bytes memory returnData) = target.call.value(msg.value).gas(gasAmount)(abi.encodePacked(call, relayer, repayer));
-			(bool success, bytes memory returnData) = target.call.value(msg.value)(call);
-			emit CallOutcome(success, returnData);
-		}
+		GMTXReceiver(target).receiveMetaTx(metatx, signature);
 
 		uint256 gasConsumed = gasBefore.sub(gasleft()).add(FLAT_GAS_USAGE);
 		uint256 refund      = gasConsumed.mul(gasPrice);

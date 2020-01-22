@@ -34,7 +34,8 @@ contract GMTXReceiver is SignatureVerifier, ERC712GMTX
 		}
 	}
 
-	function receiveMetaTx(GMTX memory _metatx, bytes memory _signature) public payable
+	function receiveMetaTx(GMTX memory _metatx, bytes memory _signature)
+	public payable
 	{
 		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(_domain()));
 

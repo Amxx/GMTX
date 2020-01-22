@@ -1,7 +1,5 @@
-var GasRepayer = artifacts.require("GasRepayer");
-var MessageHub = artifacts.require("MessageHub");
-
 module.exports = function(deployer) {
-	deployer.deploy(GasRepayer);
-	deployer.deploy(MessageHub);
+	deployer.deploy(artifacts.require("MessageHub"));
+	deployer.deploy(artifacts.require("GasRepayer"));
+	deployer.deploy(artifacts.require("GasRepayer2"));
 };
