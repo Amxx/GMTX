@@ -137,6 +137,10 @@ struct ExtendedGMTX
 
 In order to relay a meta-transaction, one should call the `receiveMetaTx(GMTX,bytes)` function on the targeted smart contract. If the meta-transaction's value is not null, the relaying call should include the corresponding value. This can be done by anyone, EOA or smart contract. This makes the GMTX protocol compatible with the GSN as well as any other reasonable relaying protocol.
 
+See the discussion [here](https://ethereum-magicians.org/t/lets-discuss-metamasks-hackathon-on-generalized-meta-transactions/3923/28).
+
+While GMTX doesn't include a repayment mechanism out of the box, it is possible to build a [relaying/repayment protocole based GMTX](https://github.com/Amxx/GMTX/blob/master/example/solidity/contracts/GasRepayer.sol). This approach allows for a clear separation between end-user, relayer and repayer.
+
 ## Limitation
 
 ### Meta-transaction refund
