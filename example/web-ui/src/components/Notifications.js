@@ -7,12 +7,14 @@ class Notifications extends React.Component
 {
 	componentDidMount()
 	{
-		this.subscription = this.props.context.emitter.addListener('Notify', this.triggerNotification);
+		this.subscription_notify = this.props.context.emitter.addListener('Notify',         this.triggerNotification);
+		this.subscription_reset  = this.props.context.emitter.addListener('NetworkChanged', this.triggerReset);
 	}
 
 	componentWillUnmount()
 	{
-		this.subscription.remove();
+		this.this.subscription_notify.remove();
+		this.this.subscription_reset.remove();
 	}
 
 	triggerNotification = (type, message, title, duration = 3000, callback = () => {}) => {
@@ -24,6 +26,11 @@ class Notifications extends React.Component
 			case 'error':   NotificationManager.error  (message, title, duration, callback); break;
 			default:        console.error(`Unsupported notification format: ${type}`);       break;
 		};
+	};
+
+	triggerReset = () => {
+		NotificationManager.listNotify = [];
+		NotificationManager.emitChange();
 	};
 
 	render()

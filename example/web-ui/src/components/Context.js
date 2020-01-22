@@ -86,7 +86,7 @@ class ContextProvider extends React.Component
 			this.setState({ target: null });
 
 			// notify
-			this.state.emitter.emit('Notify', 'error', 'Please switch to goerli.', 'Service unavailable on this network', 3600000);
+			this.state.emitter.emit('Notify', 'error', 'Be sure you are connected to the Göerli test network for this to work.', 'Service unavailable on this network', 3600000);
 		}
 		resolve();
 	})
