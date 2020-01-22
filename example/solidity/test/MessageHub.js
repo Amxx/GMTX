@@ -12,7 +12,7 @@ function extractEvents(txMined, address, name)
 	return txMined.logs.filter((ev) => { return ev.address == address && ev.event == name });
 }
 
-contract('Main', async (accounts) => {
+contract('MessageHub', async (accounts) => {
 
 	/***************************************************************************
 	 *                        Environment configuration                        *
@@ -34,13 +34,6 @@ contract('Main', async (accounts) => {
 			assert.equal(domain.chainId,           '1'                       ); // TODO: wait for ganache fix
 			assert.equal(domain.verifyingContract, MessageHubInstance.address);
 		});
-
-		// it('typehash', async () => {
-		// 	assert.equal(await MessageHubInstance.EIP712DOMAIN_TYPEHASH(), web3.utils.keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'));
-		// 	assert.equal(await MessageHubInstance.GMTX_TYPEHASH(),         web3.utils.keccak256('GMTX(address sender,bytes data,uint256 value,uint256 nonce,uint256 expiry,bytes32 salt)'));
-		// 	assert.equal(await MessageHubInstance.EIP712DOMAIN_TYPEHASH(), '0x'+TypedDataUtils.hashType('EIP712Domain', tools.TYPES).toString('hex'));
-		// 	assert.equal(await MessageHubInstance.GMTX_TYPEHASH(),         '0x'+TypedDataUtils.hashType('GMTX',         tools.TYPES).toString('hex'));
-		// });
 	});
 
 	describe('MessageHub', async () => {

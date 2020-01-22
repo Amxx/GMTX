@@ -10,7 +10,7 @@ module.exports =
 			host:       "localhost",
 			port:       8545,
 			network_id: "*", // Match any network id,
-			gasPrice:   22000000000, //22Gwei
+			gasPrice:   10000000000, //10Gwei
 		},
 		coverage:
 		{

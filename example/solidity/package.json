@@ -20,12 +20,15 @@
   "homepage": "https://github.com/amxx/GMTX.git#readme",
   "devDependencies": {
     "@openzeppelin/test-helpers": "0.5.4",
-    "@truffle/hdwallet-provider": "1.0.28",
+    "@truffle/hdwallet-provider": "^1.0.29",
     "chai": "4.2.0",
     "eth-sig-util": "2.5.2",
-    "ganache-cli": "6.8.1",
-    "gmtx-solidity": "0.0.1",
-    "husky": "4.0.4",
-    "truffle": "5.1.7"
+    "ganache-cli": "^6.8.2",
+    "gmtx-solidity": "0.0.3",
+    "husky": "^4.2.0",
+    "truffle": "^5.1.9"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^2.4.0"
   }
 }
