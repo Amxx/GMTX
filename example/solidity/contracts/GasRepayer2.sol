@@ -4,8 +4,7 @@ pragma experimental ABIEncoderV2;
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
-import '../../../core/contracts/GMTXReceiver.sol';
-// import 'gmtx-solidity/contracts/GMTXReceiver.sol';
+import 'gmtx-solidity/contracts/GMTXReceiver.sol';
 
 
 contract GasRepayer2 is ERC20, ERC20Detailed, GMTXReceiver
