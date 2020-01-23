@@ -148,6 +148,11 @@ See the discussion [here](https://ethereum-magicians.org/t/lets-discuss-metamask
 
 While GMTX doesn't include a repayment mechanism out of the box, it is possible to build a [relaying/repayment protocole based GMTX](https://github.com/Amxx/GMTX/blob/master/example/solidity/contracts/GasRepayer.sol). This approach allows for a clear separation between end-user, relayer and repayer.
 
+
+## Comming next: Batched Transactions
+
+In the contracts you will find a `GTMXRecipient_V2.sol` and the corresponding `ERC712GMTX_V2.sol`. These are non-tested protoypes for a refactor of the ERC712 structures to better support batched meta-transaction. The overall logic is very similar.
+
 ## Authors & Contributors
 
 - Hadrien Croubois <hadrien.croubois@gmail.com>
