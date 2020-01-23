@@ -22,7 +22,7 @@ contract GMTXRecipient is SignatureVerifier, ERC712GMTX
 	event GMTXReceived(bytes32 hash);
 
 	constructor(bool useMirror)
-	public
+	public ERC712GMTX("GeneralizedMetaTX", "0.0.1-beta.1")
 	{
 		if (useMirror)
 		{

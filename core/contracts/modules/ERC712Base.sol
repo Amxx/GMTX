@@ -18,7 +18,7 @@ contract ERC712Base
 	}
 
 	constructor(string memory name, string memory version)
-	public
+	internal
 	{
 		m_name    = name;
 		m_version = version;
