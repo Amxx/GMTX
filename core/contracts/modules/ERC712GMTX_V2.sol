@@ -50,9 +50,9 @@ contract ERC712GMTX is ERC712Base
 	{
 		return keccak256(abi.encode(
 			GMTXCORE_TYPEHASH
-		, keccak256(gmtxcore.data)
-		, gmtxcore.gas
-		, gmtxcore.value
+		,	keccak256(gmtxcore.data)
+		,	gmtxcore.gas
+		,	gmtxcore.value
 		));
 	}
 
@@ -61,10 +61,10 @@ contract ERC712GMTX is ERC712Base
 	{
 		return keccak256(abi.encode(
 			GMTXDETAILS_TYPEHASH
-		, gmtxdetails.from
-		, gmtxdetails.nonce
-		, gmtxdetails.expiry
-		, gmtxdetails.salt
+		,	gmtxdetails.from
+		,	gmtxdetails.nonce
+		,	gmtxdetails.expiry
+		,	gmtxdetails.salt
 		));
 	}
 
@@ -73,8 +73,8 @@ contract ERC712GMTX is ERC712Base
 	{
 		return keccak256(abi.encode(
 			GMTXSINGLE_TYPEHASH
-		, _hash(gmtxsingle.tx)
-		, _hash(gmtxsingle.details)
+		,	_hash(gmtxsingle.tx)
+		,	_hash(gmtxsingle.details)
 		));
 	}
 
@@ -90,8 +90,8 @@ contract ERC712GMTX is ERC712Base
 
 		return keccak256(abi.encode(
 			GMTXBATCH_TYPEHASH
-		, _hash(array)
-		, _hash(gmtxcorebatch.details)
+		,	_hash(array)
+		,	_hash(gmtxcorebatch.details)
 		));
 	}
 }
