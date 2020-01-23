@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import './modules/SignatureVerifier.sol';
-import './modules/ERC712GMTX.sol';
+import './modules/ERC712GMTX_V2.sol';
 
 contract GMTXMirror
 {
@@ -37,15 +37,18 @@ contract GMTXRecipient2 is SignatureVerifier, ERC712GMTX
 		}
 	}
 
-	function receiveMetaTx(GMTX memory _metatx, bytes memory _signature)
+	function receiveMetaTx(GMTXSingle memory _metatx, bytes memory _signature)
 	public payable
 	{
 		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(_domain()));
-		_preflightReplay(digest);
-		_preflightSignature(_metatx.from, digest, _signature);
-		_preflightValue(_metatx.value);
 
-		_relayMetaTx(_metatx, digest, 0);
+		_preflightReplay   (digest);
+		_preflightSignature(_metatx.details.from, digest, _signature);
+		_preflightNonce    (_metatx.details.from, _metatx.details.nonce);
+		_preflightExpiry   (_metatx.details.expiry);
+		_preflightValue    (_metatx.tx.value);
+
+		_relayCore(_metatx.details.from, _metatx.tx, digest, 0);
 	}
 
 	function receiveMetaTxBatch(GMTXBatch memory _metatxs, bytes memory _signature)
@@ -53,32 +56,28 @@ contract GMTXRecipient2 is SignatureVerifier, ERC712GMTX
 	{
 		bytes32 digest = _toEthTypedStructHash(_hash(_metatxs), _hash(_domain()));
 
-		address sender     = _metatxs.transactions[0].from;
-		uint256 totalValue = _metatxs.transactions[0].value;
-		for (uint256 i = 1; i < _metatxs.transactions.length; ++i)
+		uint256 value = 0;
+		for (uint256 i = 0; i < _metatxs.txs.length; ++i)
 		{
-			require(_metatxs.transactions[0].from == _metatxs.transactions[i].from, 'GMTX/batch-inconsistent-from');
-			totalValue = totalValue.add(_metatxs.transactions[i].value);
+			value = value.add(_metatxs.txs[i].value);
 		}
 
-		_preflightReplay(digest);
-		_preflightSignature(sender, digest, _signature);
-		_preflightValue(totalValue);
+		_preflightReplay   (digest);
+		_preflightSignature(_metatxs.details.from, digest, _signature);
+		_preflightNonce    (_metatxs.details.from, _metatxs.details.nonce);
+		_preflightExpiry   (_metatxs.details.expiry);
+		_preflightValue    (value);
 
-		for (uint256 i = 0; i < _metatxs.transactions.length; ++i)
+		for (uint256 i = 0; i < _metatxs.txs.length; ++i)
 		{
-			_relayMetaTx(_metatxs.transactions[i], digest, i);
+			_relayCore(_metatxs.details.from, _metatxs.txs[i], digest, i);
 		}
 	}
 
-	function _relayMetaTx(GMTX memory _metatx, bytes32 _digest, uint256 _id)
+	function _relayCore(address _from, GMTXCore memory _metacore, bytes32 _digest, uint256 _id)
 	internal
 	{
-		_preflightNonce(_metatx.from, _metatx.nonce);
-		_preflightExpiry(_metatx.expiry);
-
-		(bool success, bytes memory returndata) = gmtx_mirror.call.gas(_metatx.gas).value(_metatx.value)(abi.encodePacked(_metatx.data, msg.sender, _metatx.from));
-
+		(bool success, bytes memory returndata) = gmtx_mirror.call.gas(_metacore.gas).value(_metacore.value)(abi.encodePacked(_metacore.data, msg.sender, _from));
 		if (success)
 		{
 			emit GMTXReceived(_digest, _id);
