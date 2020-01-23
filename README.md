@@ -41,7 +41,7 @@ Using the GMTX toolkit will simply had generalized meta-transaction to your smar
 
 To enable GMTX on a smart contract follow these steps:
 
-- Inherit from the [GMTXReceiver contract](https://github.com/Amxx/GMTX/tree/master/core/contracts).
+- Inherit from the [GMTXRecipient contract](https://github.com/Amxx/GMTX/tree/master/core/contracts).
 - Replace all references to `msg.sender` with call to the internal function `_msgSender()`.
 
 That's it! You can see an example use-case [here](https://github.com/Amxx/GMTX/blob/master/example/solidity/contracts/MessageHub.sol). Live front-end is [here](https://gmtx.app.hadriencroubois.com).
@@ -61,7 +61,7 @@ GMTX has been designed with security in mind. Still, this is early work and we d
 
 ## How does it work?
 
-### GMTXReceiver smart contract
+### GMTXRecipient smart contract
 
 To enable meta-transaction support, the contract must inherit from the GMTXReceiver. This will expose a function `receiveMetaTx(GMTX, bytes) public payable`. This is the endpoint that processes meta-transaction.
 
