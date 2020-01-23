@@ -22,5 +22,8 @@
   "homepage": "https://github.com/amxx/GMTX.git#readme",
   "devDependencies": {
     "truffle": "^5.1.9"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^2.4.0"
   }
 }

@@ -13,7 +13,7 @@ contract GMTXMirror
 	}
 }
 
-contract GMTXReceiver is SignatureVerifier, ERC712GMTX
+contract GMTXRecipient is SignatureVerifier, ERC712GMTX
 {
 	address                     public gmtx_mirror;
 	mapping(bytes32 => bool   ) public gmtx_replay;
