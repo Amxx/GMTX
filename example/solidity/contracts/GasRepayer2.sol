@@ -4,10 +4,10 @@ pragma experimental ABIEncoderV2;
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
-import 'gmtx-solidity/contracts/GMTXReceiver.sol';
+import 'gmtx-solidity/contracts/GMTXRecipient.sol';
 
 
-contract GasRepayer2 is ERC20, ERC20Detailed, GMTXReceiver
+contract GasRepayer2 is ERC20, ERC20Detailed, GMTXRecipient
 {
 	using SafeMath for uint256;
 
@@ -15,7 +15,7 @@ contract GasRepayer2 is ERC20, ERC20Detailed, GMTXReceiver
 
 	constructor()
 	public
-	GMTXReceiver(false)
+	GMTXRecipient(false)
 	ERC20Detailed("GasRepayerToken2", "GRT2", 18)
 	{}
 
@@ -26,7 +26,7 @@ contract GasRepayer2 is ERC20, ERC20Detailed, GMTXReceiver
 		address payable repayer   = _msgSender();
 		address payable relayer   = _msgRelayer();
 
-		GMTXReceiver(target).receiveMetaTx(metatx, signature);
+		GMTXRecipient(target).receiveMetaTx(metatx, signature);
 
 		uint256 gasConsumed = gasBefore.sub(gasleft()).add(FLAT_GAS_USAGE);
 		uint256 refund      = gasConsumed.mul(gasPrice);

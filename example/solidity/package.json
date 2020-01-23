@@ -24,7 +24,7 @@
     "chai": "4.2.0",
     "eth-sig-util": "2.5.2",
     "ganache-cli": "6.8.2",
-    "gmtx-solidity": "0.0.5",
+    "gmtx-solidity": "0.0.6",
     "husky": "4.2.0",
     "truffle": "5.1.9"
   },
