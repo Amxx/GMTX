@@ -31,7 +31,7 @@ contract ERC712GMTX is ERC712Base
 	}
 	struct GMTXBatch
 	{
-		GMTXCore[] txs;
+		GMTXCore[]  txs;
 		GMTXDetails details;
 	}
 
