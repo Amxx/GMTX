@@ -80,7 +80,7 @@ contract('GasRepayer', async (accounts) => {
 						'relayed-call-test',
 					],
 				});
-				messagehub_sign = await tools.sign(messagehub_gmtx, MessageHubInstance, wallets.privateKeys[user.toLowerCase()]);
+				messagehub_sign = await tools.sign('GMTX', messagehub_gmtx, MessageHubInstance, wallets.privateKeys[user.toLowerCase()]);
 
 				// Repayer meta-transaction (wraps the user-metatransaction)
 				gasrelayer_gmtx = await prepareGMTX({
@@ -95,7 +95,7 @@ contract('GasRepayer', async (accounts) => {
 					],
 					gas: 100000, // preparation fails due to ERC20 burn
 				});
-				gasrelayer_sign  = await tools.sign(gasrelayer_gmtx, GasRepayerInstance, wallets.privateKeys[repayer.toLowerCase()]);
+				gasrelayer_sign  = await tools.sign('GMTX', gasrelayer_gmtx, GasRepayerInstance, wallets.privateKeys[repayer.toLowerCase()]);
 
 				// Only for MessageHub purposes
 				_messagehub_digest = '0x'+TypedDataUtils.sign({

@@ -14,7 +14,7 @@ contract GMTXMirror
 	}
 }
 
-contract GMTXRecipient2 is SignatureVerifier, ERC712GMTX
+contract GMTXRecipient_V2 is SignatureVerifier, ERC712GMTX_V2
 {
 	using SafeMath for uint256;
 
@@ -25,7 +25,7 @@ contract GMTXRecipient2 is SignatureVerifier, ERC712GMTX
 	event GMTXReceived(bytes32 digest, uint256 index);
 
 	constructor(bool useMirror)
-	public ERC712GMTX("GeneralizedMetaTX", "0.0.1-beta.2")
+	public ERC712GMTX_V2("GeneralizedMetaTX", "0.0.1-beta.2")
 	{
 		if (useMirror)
 		{
@@ -37,44 +37,30 @@ contract GMTXRecipient2 is SignatureVerifier, ERC712GMTX
 		}
 	}
 
-	function receiveMetaTx(GMTXSingle memory _metatx, bytes memory _signature)
+	function receiveMetaTx(GMTXv2 memory _metatx, bytes memory _signature)
 	public payable
 	{
 		bytes32 digest = _toEthTypedStructHash(_hash(_metatx), _hash(_domain()));
+
+		uint256 value = 0;
+		for (uint256 i = 0; i < _metatx.txs.length; ++i)
+		{
+			value = value.add(_metatx.txs[i].value);
+		}
 
 		_preflightReplay   (digest);
 		_preflightSignature(_metatx.details.from, digest, _signature);
 		_preflightNonce    (_metatx.details.from, _metatx.details.nonce);
 		_preflightExpiry   (_metatx.details.expiry);
-		_preflightValue    (_metatx.tx.value);
-
-		_relayCore(_metatx.details.from, _metatx.tx, digest, 0);
-	}
-
-	function receiveMetaTxBatch(GMTXBatch memory _metatxs, bytes memory _signature)
-	public payable
-	{
-		bytes32 digest = _toEthTypedStructHash(_hash(_metatxs), _hash(_domain()));
-
-		uint256 value = 0;
-		for (uint256 i = 0; i < _metatxs.txs.length; ++i)
-		{
-			value = value.add(_metatxs.txs[i].value);
-		}
-
-		_preflightReplay   (digest);
-		_preflightSignature(_metatxs.details.from, digest, _signature);
-		_preflightNonce    (_metatxs.details.from, _metatxs.details.nonce);
-		_preflightExpiry   (_metatxs.details.expiry);
 		_preflightValue    (value);
 
-		for (uint256 i = 0; i < _metatxs.txs.length; ++i)
+		for (uint256 i = 0; i < _metatx.txs.length; ++i)
 		{
-			_relayCore(_metatxs.details.from, _metatxs.txs[i], digest, i);
+			_relay(_metatx.details.from, _metatx.txs[i], digest, i);
 		}
 	}
 
-	function _relayCore(address _from, GMTXCore memory _metacore, bytes32 _digest, uint256 _id)
+	function _relay(address _from, GMTXCore memory _metacore, bytes32 _digest, uint256 _id)
 	internal
 	{
 		(bool success, bytes memory returndata) = gmtx_mirror.call.gas(_metacore.gas).value(_metacore.value)(abi.encodePacked(_metacore.data, msg.sender, _from));

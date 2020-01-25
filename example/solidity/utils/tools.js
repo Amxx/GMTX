@@ -1,42 +1,44 @@
 const { ethers } = require('ethers');
-const sigUtil    = require('eth-sig-util')
+const sigUtil    = require('eth-sig-util');
+
 
 ethers.errors.setLogLevel('error');
 
 const TYPES =
 {
 	EIP712Domain: [
-		{ name: "name",              type: "string"  },
-		{ name: "version",           type: "string"  },
-		{ name: "chainId",           type: "uint256" },
-		{ name: "verifyingContract", type: "address" },
+		{ name: "name",              type: "string"      },
+		{ name: "version",           type: "string"      },
+		{ name: "chainId",           type: "uint256"     },
+		{ name: "verifyingContract", type: "address"     },
 	],
 	GMTX: [
-		{ name: "from",   type: "address" },
-		{ name: "data",   type: "bytes"   },
-		{ name: "gas",    type: "uint256" },
-		{ name: "value",  type: "uint256" },
-		{ name: "nonce",  type: "uint256" },
-		{ name: "expiry", type: "uint256" },
-		{ name: "salt",   type: "bytes32" },
+		{ name: "from",              type: "address"     },
+		{ name: "data",              type: "bytes"       },
+		{ name: "gas",               type: "uint256"     },
+		{ name: "value",             type: "uint256"     },
+		{ name: "nonce",             type: "uint256"     },
+		{ name: "expiry",            type: "uint256"     },
+		{ name: "salt",              type: "bytes32"     },
+	],
+	GMTXCore: [
+		{ name: "data",              type: "bytes"       },
+		{ name: "gas",               type: "uint256"     },
+		{ name: "value",             type: "uint256"     },
+	],
+	GMTXDetails: [
+		{ name: "from",              type: "address"     },
+		{ name: "nonce",             type: "uint256"     },
+		{ name: "expiry",            type: "uint256"     },
+		{ name: "salt",              type: "bytes32"     },
+	],
+	GMTXv2: [
+		{ name: "txs",               type: "GMTXCore[]"  },
+		{ name: "details",           type: "GMTXDetails" },
 	],
 }
 
-function sanitize(gmtx)
-{
-	return {
-		// from is necessary
-		// data is necessary
-		// gas is necessary
-		value:  0,
-		nonce:  0,
-		expiry: 0,
-		salt:   ethers.utils.hexlify(ethers.utils.randomBytes(32)),
-		...tx
-	};
-}
-
-function sign(gmtx, target, pk)
+function sign(primaryType, message, target, pk)
 {
 	return new Promise((resolve, reject) => {
 		target.gmtx_domain()
@@ -44,24 +46,9 @@ function sign(gmtx, target, pk)
 			let data =
 			{
 				types: TYPES,
-				primaryType: 'GMTX',
-				domain:
-				{
-					name:              domain.name,
-					version:           domain.version,
-					chainId:           domain.chainId.toString(),
-					verifyingContract: domain.verifyingContract
-				},
-				message:
-				{
-					from:   gmtx.from.toString(),
-					data:   gmtx.data,
-					value:  gmtx.value.toString(),
-					gas:    gmtx.gas.toString(),
-					nonce:  gmtx.nonce.toString(),
-					expiry: gmtx.expiry.toString(),
-					salt:   gmtx.salt.toString()
-				},
+				primaryType,
+				domain,
+				message,
 			}
 			resolve(sigUtil.signTypedData(Buffer.from(pk.substr(2), 'hex'), { data }))
 			// signer.provider._sendAsync({
@@ -85,6 +72,5 @@ function sign(gmtx, target, pk)
 
 module.exports = {
 	TYPES,
-	sanitize,
 	sign,
 }

@@ -4,12 +4,11 @@ pragma experimental ABIEncoderV2;
 import './ERC712Base.sol';
 
 
-contract ERC712GMTX is ERC712Base
+contract ERC712GMTX_V2 is ERC712Base
 {
 	bytes32 internal constant GMTXCORE_TYPEHASH    = keccak256(bytes("GMTXCore(bytes data,uint256 gas,uint256 value)"));
 	bytes32 internal constant GMTXDETAILS_TYPEHASH = keccak256(bytes("GMTXDetails(address from,uint256 nonce,uint256 expiry,bytes32 salt)"));
-	bytes32 internal constant GMTXSINGLE_TYPEHASH  = keccak256(bytes("GMTXSingle(GMTXCore tx,GMTXDetails details)GMTXCore(bytes data,uint256 gas,uint256 value)GMTXDetails(address from,uint256 nonce,uint256 expiry,bytes32 salt)"));
-	bytes32 internal constant GMTXBATCH_TYPEHASH   = keccak256(bytes("GMTXBatch(GMTXCore[] txs,GMTXDetails details)GMTXCore(bytes data,uint256 gas,uint256 value)GMTXDetails(address from,uint256 nonce,uint256 expiry,bytes32 salt)"));
+	bytes32 internal constant GMTXv2_TYPEHASH      = keccak256(bytes("GMTXv2(GMTXCore[] txs,GMTXDetails details)GMTXCore(bytes data,uint256 gas,uint256 value)GMTXDetails(address from,uint256 nonce,uint256 expiry,bytes32 salt)"));
 
 	struct GMTXCore
 	{
@@ -24,12 +23,7 @@ contract ERC712GMTX is ERC712Base
 		uint256 expiry;
 		bytes32 salt;
 	}
-	struct GMTXSingle
-	{
-		GMTXCore    tx;
-		GMTXDetails details;
-	}
-	struct GMTXBatch
+	struct GMTXv2
 	{
 		GMTXCore[]  txs;
 		GMTXDetails details;
@@ -68,30 +62,21 @@ contract ERC712GMTX is ERC712Base
 		));
 	}
 
-	function _hash(GMTXSingle memory gmtxsingle)
+
+	function _hash(GMTXv2 memory gmtx)
 	internal pure returns (bytes32)
 	{
-		return keccak256(abi.encode(
-			GMTXSINGLE_TYPEHASH
-		,	_hash(gmtxsingle.tx)
-		,	_hash(gmtxsingle.details)
-		));
-	}
+		bytes32[] memory array = new bytes32[](gmtx.txs.length);
 
-	function _hash(GMTXBatch memory gmtxcorebatch)
-	internal pure returns (bytes32)
-	{
-		bytes32[] memory array = new bytes32[](gmtxcorebatch.txs.length);
-
-		for (uint256 i = 0; i < gmtxcorebatch.txs.length; ++i)
+		for (uint256 i = 0; i < gmtx.txs.length; ++i)
 		{
-			array[i] = _hash(gmtxcorebatch.txs[i]);
+			array[i] = _hash(gmtx.txs[i]);
 		}
 
 		return keccak256(abi.encode(
-			GMTXBATCH_TYPEHASH
+			GMTXv2_TYPEHASH
 		,	_hash(array)
-		,	_hash(gmtxcorebatch.details)
+		,	_hash(gmtx.details)
 		));
 	}
 }
