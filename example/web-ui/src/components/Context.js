@@ -174,6 +174,7 @@ class ContextProvider extends React.Component
 	}
 
 	gmtx_relay = (gmtx, signature) => {
+		console.log(gmtx, signature);
 		return this.state.target.receiveMetaTx(gmtx, signature);
 	}
 
